@@ -44,7 +44,7 @@ A robust, scalable e-commerce backend API built with NestJS, featuring an advanc
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/a-3isa/ecommerce_store
    cd ecommerce_store
    ```
 
