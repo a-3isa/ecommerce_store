@@ -1,98 +1,494 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# E-Commerce Store Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust, scalable e-commerce backend API built with NestJS, featuring an advanced Entity-Attribute-Value (EAV) product system, JWT authentication, and comprehensive product filtering capabilities.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+### Core Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **User Management**: Complete user registration, authentication, and profile management
+- **JWT Authentication**: Secure token-based authentication with role-based access control
+- **Category Management**: Hierarchical category structure for product organization
+- **Advanced Product System**: Flexible EAV (Entity-Attribute-Value) model for dynamic product attributes
+- **Smart Filtering**: Advanced product filtering by attributes, categories, price, and search terms
+- **Search Functionality**: Full-text search across products with attribute-based filtering
 
-## Project setup
+### EAV Product System
 
-```bash
-$ npm install
+- **Dynamic Attributes**: Create custom attributes (color, size, material, etc.) without schema changes
+- **Flexible Data Types**: Support for text, number, boolean, date, select, and multiselect attributes
+- **Attribute Management**: Complete CRUD operations for product attributes
+- **Validation Rules**: Built-in validation for attribute values
+- **Category-Specific Attributes**: Different attributes per category
+
+## 🛠 Technology Stack
+
+- **Framework**: NestJS v11 (Node.js)
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: TypeORM
+- **Authentication**: JWT (JSON Web Tokens) with Passport
+- **Validation**: class-validator & class-transformer
+- **Password Hashing**: bcrypt
+- **Testing**: Jest with e2e testing
+- **Linting**: ESLint + Prettier
+
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- PostgreSQL (v12 or higher)
+- npm or yarn
+
+## 🚀 Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd ecommerce_store
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Database Configuration
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USERNAME=your_username
+   DB_PASSWORD=your_password
+   DB_DATABASE=ecommerce_db
+   DB_AUTO_LOAD_ENTITIES=true
+   DB_SYNCHRONIZE=true
+
+   # JWT Configuration
+   JWT_SECRET=your-super-secret-jwt-key
+   JWT_EXPIRES_IN=3600s
+
+   # Application
+   PORT=3000
+   NODE_ENV=development
+   ```
+
+4. **Database Setup**
+
+   ```sql
+   CREATE DATABASE ecommerce_db;
+   ```
+
+5. **Run the application**
+
+   ```bash
+   # Development mode
+   npm run start:dev
+
+   # Production mode
+   npm run start:prod
+   ```
+
+The API will be available at `http://localhost:3000`
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+
+#### Register User
+
+```http
+POST /auth/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
 ```
 
-## Compile and run the project
+#### Login
 
-```bash
-# development
-$ npm run start
+```http
+POST /auth/login
+Content-Type: application/json
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+{
+  "username": "john_doe",
+  "password": "securepassword123"
+}
 ```
 
-## Run tests
+#### Admin Register
 
-```bash
-# unit tests
-$ npm run test
+```http
+POST /auth/adminRegister
+Content-Type: application/json
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "adminpassword123"
+}
 ```
 
-## Deployment
+### User Endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+#### Get All Users
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```http
+GET /user
+Authorization: Bearer <jwt_token>
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### Get User by ID
 
-## Resources
+```http
+GET /user/:id
+Authorization: Bearer <jwt_token>
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Category Endpoints
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+#### Create Category
 
-## Support
+```http
+POST /category
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+{
+  "name": "Electronics",
+  "description": "Electronic devices and accessories"
+}
+```
 
-## Stay in touch
+#### Get All Categories
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```http
+GET /category
+```
 
-## License
+#### Get Category by ID
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```http
+GET /category/:id
+```
+
+### Product Endpoints
+
+#### Create Product with EAV Attributes
+
+```http
+POST /product
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "name": "T-Shirt",
+  "slug": "t-shirt",
+  "description": "Comfortable cotton t-shirt",
+  "price": 29.99,
+  "stock": 100,
+  "type": "single",
+  "sku": "TS001",
+  "barcode": "123456789",
+  "categoryId": "category-uuid",
+  "attributes": [
+    {
+      "attributeId": "color-attribute-id",
+      "value": "Red",
+      "metadata": {
+        "unit": "color"
+      }
+    },
+    {
+      "attributeId": "size-attribute-id",
+      "value": "Large",
+      "metadata": {
+        "unit": "size"
+      }
+    }
+  ]
+}
+```
+
+#### Get Products with Filtering
+
+```http
+GET /product?search=t-shirt&categoryId=electronics&minPrice=10&maxPrice=50&attributeFilters=color:red,size:large&page=1&limit=10&sortBy=price&sortOrder=ASC
+```
+
+#### Search Products
+
+```http
+GET /product/search?q=t-shirt
+```
+
+#### Get Products by Category
+
+```http
+GET /product/category/:categoryId
+```
+
+#### Get Products by Attribute
+
+```http
+GET /product/attribute/:attributeId/:value
+```
+
+#### Get Category Filter Attributes
+
+```http
+GET /product/category-filters/attributes?categoryId=electronics
+```
+
+#### Get Category Attribute Values
+
+```http
+GET /product/category-filters/:categoryId/attribute/:attributeId/values
+```
+
+## 🗄️ Database Schema
+
+### Core Tables
+
+#### Users
+
+- `id` (UUID, Primary Key)
+- `username` (String, Unique)
+- `email` (String, Unique)
+- `password` (String, Hashed)
+- `roles` (JSON)
+- `isActive` (Boolean)
+- `createdAt`, `updatedAt` (Timestamps)
+
+#### Categories
+
+- `id` (UUID, Primary Key)
+- `name` (String, Unique)
+- `slug` (String, Unique)
+- `description` (Text)
+- `parentId` (UUID, Foreign Key)
+- `isActive` (Boolean)
+- `createdAt`, `updatedAt` (Timestamps)
+
+#### Products
+
+- `id` (UUID, Primary Key)
+- `name` (String)
+- `slug` (String, Unique)
+- `description` (Text)
+- `price` (Decimal)
+- `stock` (Integer)
+- `type` (Enum: single, variant, group, gift)
+- `sku` (String, Unique)
+- `barcode` (String, Unique)
+- `categoryId` (UUID, Foreign Key)
+- `isActive` (Boolean)
+- `createdAt`, `updatedAt` (Timestamps)
+
+### EAV Tables
+
+#### Product Attributes
+
+- `id` (UUID, Primary Key)
+- `name` (String, Unique) - e.g., "color", "size"
+- `displayName` (String) - e.g., "Color", "Size"
+- `type` (Enum: text, number, boolean, date, select, multiselect)
+- `description` (Text)
+- `isRequired` (Boolean)
+- `isActive` (Boolean)
+- `options` (JSON Array) - For select/multiselect types
+- `validationRules` (JSON)
+- `sortOrder` (Integer)
+- `createdAt`, `updatedAt` (Timestamps)
+
+#### Product Attribute Values
+
+- `id` (UUID, Primary Key)
+- `productId` (UUID, Foreign Key)
+- `attributeId` (UUID, Foreign Key)
+- `value` (Text)
+- `isActive` (Boolean)
+- `createdAt`, `updatedAt` (Timestamps)
+
+## 🔧 EAV System Usage
+
+### 1. Create Attributes First
+
+```http
+POST /admin/attributes
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "name": "color",
+  "displayName": "Color",
+  "type": "select",
+  "options": ["Red", "Blue", "Green", "Black"],
+  "isRequired": true,
+  "description": "Product color options"
+}
+```
+
+### 2. Create Products with Attributes
+
+```http
+POST /product
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Cotton T-Shirt",
+  "slug": "cotton-t-shirt",
+  "price": 25.99,
+  "stock": 50,
+  "categoryId": "clothing-category-id",
+  "attributes": [
+    {
+      "attributeId": "color-attribute-id",
+      "value": "Red"
+    },
+    {
+      "attributeId": "size-attribute-id",
+      "value": "Large"
+    }
+  ]
+}
+```
+
+### 3. Filter Products by Attributes
+
+```http
+GET /product?attributeFilters=color:red,size:large
+```
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## 📝 Development Guidelines
+
+### Code Style
+
+- Follow TypeScript best practices
+- Use ESLint and Prettier for code formatting
+- Write descriptive commit messages
+- Add proper error handling
+
+### API Guidelines
+
+- Use appropriate HTTP status codes
+- Include proper error messages
+- Validate all inputs
+- Use pagination for list endpoints
+- Include proper TypeScript types
+
+### Database Guidelines
+
+- Use UUID for primary keys
+- Include createdAt and updatedAt timestamps
+- Use soft deletes where appropriate
+- Add proper indexes for performance
+
+## 🔐 Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Role-based access control
+- Input validation and sanitization
+- SQL injection prevention through TypeORM
+- CORS configuration
+
+## 📈 Performance Features
+
+- Database query optimization
+- Pagination support
+- Efficient EAV queries with proper indexing
+- Caching strategies (can be implemented)
+- Lazy loading for related entities
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new features
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Check the API documentation
+- Review the code examples
+
+## 🔄 API Response Examples
+
+### Successful Product Creation
+
+```json
+{
+  "id": "product-uuid",
+  "name": "T-Shirt",
+  "slug": "t-shirt",
+  "price": 29.99,
+  "stock": 100,
+  "attributeValues": [
+    {
+      "id": "attr-value-uuid",
+      "attribute": {
+        "id": "color-attr-id",
+        "name": "color",
+        "displayName": "Color"
+      },
+      "value": "Red"
+    }
+  ]
+}
+```
+
+### Filtered Products Response
+
+```json
+{
+  "products": [...],
+  "total": 150,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 15
+}
+```
+
+## 🎯 Future Enhancements
+
+- [ ] Image upload and management
+- [ ] Product reviews and ratings
+- [ ] Shopping cart functionality
+- [ ] Order management system
+- [ ] Payment integration
+- [ ] Inventory management
+- [ ] Analytics and reporting
+- [ ] Multi-language support
+- [ ] API rate limiting
+- [ ] Caching layer (Redis)

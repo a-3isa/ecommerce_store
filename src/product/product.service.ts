@@ -253,7 +253,6 @@ export class ProductService {
       .leftJoinAndSelect('product.attributeValues', 'attributeValues')
       .leftJoinAndSelect('attributeValues.attribute', 'attribute')
       .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.variants', 'variants')
       .leftJoinAndSelect('product.images', 'images');
 
     // Apply filters
@@ -302,8 +301,9 @@ export class ProductService {
 
     // Apply sorting
     const validSortFields = ['name', 'price', 'createdAt', 'updatedAt'];
-    const sortBy = validSortFields.includes(filters.sortBy)
-      ? `product.${filters.sortBy}`
+    const sortByField = filters.sortBy ?? 'createdAt';
+    const sortBy = validSortFields.includes(sortByField)
+      ? `product.${sortByField}`
       : 'product.createdAt';
 
     queryBuilder.orderBy(sortBy, filters.sortOrder);
