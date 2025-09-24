@@ -1,20 +1,62 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
 import { Product } from './entities/product.entity';
-import { ProductAttribute } from './entities/product-attribute.entity';
+import {
+  ProductAttribute,
+  AttributeType,
+} from './entities/product-attribute.entity';
 import { ProductAttributeValue } from './entities/product-attribute-value.entity';
+
+// Type definitions for safe operations
+export interface ValidationRules {
+  min?: number;
+  max?: number;
+  pattern?: string;
+  required?: boolean;
+}
+
+export interface CategoryAttributeData {
+  categoryId: string;
+  categoryName: string;
+  attributes: Map<string, AttributeData>;
+}
+
+export interface AttributeData {
+  id: string;
+  name: string;
+  displayName: string;
+  type: AttributeType;
+  isRequired: boolean;
+  isActive: boolean;
+  sortOrder: number;
+  values: Set<string>;
+}
+
+export interface CategoryFilterResult {
+  categoryId: string;
+  categoryName: string;
+  attributes: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+    type: AttributeType;
+    isRequired: boolean;
+    isActive: boolean;
+    sortOrder: number;
+    values: string[];
+  }>;
+}
 
 @Injectable()
 export class ProductService {
@@ -25,6 +67,7 @@ export class ProductService {
     private attributeRepository: Repository<ProductAttribute>,
     @InjectRepository(ProductAttributeValue)
     private attributeValueRepository: Repository<ProductAttributeValue>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -125,7 +168,11 @@ export class ProductService {
   // EAV-specific methods - NO AUTO-CREATION
   async createProductAttributes(
     productId: string,
-    attributes: any[],
+    attributes: Array<{
+      attributeId: string;
+      value: string;
+      isActive?: boolean;
+    }>,
   ): Promise<void> {
     for (const attr of attributes) {
       let attribute: ProductAttribute;
@@ -149,8 +196,8 @@ export class ProductService {
       }
 
       const attributeValue = this.attributeValueRepository.create({
-        product: { id: productId } as any,
-        attribute,
+        product: { id: productId },
+        attr: attribute,
         value: attr.value,
         isActive: attr.isActive ?? true,
       });
@@ -161,7 +208,11 @@ export class ProductService {
 
   async updateProductAttributes(
     productId: string,
-    attributes: any[],
+    attributes: Array<{
+      attributeId: string;
+      value: string;
+      isActive?: boolean;
+    }>,
   ): Promise<void> {
     // First, deactivate existing attributes
     await this.attributeValueRepository.update(
@@ -186,9 +237,16 @@ export class ProductService {
   }
 
   // Admin methods for attribute management
-  async createAttribute(
-    createAttributeDto: Partial<ProductAttribute>,
-  ): Promise<ProductAttribute> {
+  async createAttribute(createAttributeDto: {
+    name: string;
+    displayName: string;
+    type?: AttributeType;
+    description?: string;
+    isRequired?: boolean;
+    isActive?: boolean;
+    validationRules?: ValidationRules;
+    sortOrder?: number;
+  }): Promise<ProductAttribute> {
     const attribute = this.attributeRepository.create(createAttributeDto);
     return this.attributeRepository.save(attribute);
   }
@@ -222,10 +280,24 @@ export class ProductService {
   }
 
   async getAllAttributes(): Promise<ProductAttribute[]> {
-    return this.attributeRepository.find({
+    const cacheKey = 'all_active_attributes';
+
+    // Try to get from cache first
+    const cachedResult =
+      await this.cacheManager.get<ProductAttribute[]>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
+    const result = await this.attributeRepository.find({
       where: { isActive: true },
       order: { sortOrder: 'ASC' },
     });
+
+    // Cache the result for 15 minutes
+    await this.cacheManager.set(cacheKey, result, 900000);
+
+    return result;
   }
 
   async getAttributeById(id: string): Promise<ProductAttribute> {
@@ -285,16 +357,20 @@ export class ProductService {
     // Apply attribute filters
     if (filters.attributeFilters && filters.attributeFilters.length > 0) {
       for (let i = 0; i < filters.attributeFilters.length; i++) {
-        const [attributeId, value] = filters.attributeFilters[i].split(':');
-        if (attributeId && value) {
-          queryBuilder.andWhere(
-            `EXISTS (SELECT 1 FROM product_attribute_values pav${i}
-                     WHERE pav${i}.productId = product.id
-                     AND pav${i}.attributeId = :attributeId${i}
-                     AND pav${i}.value = :value${i}
-                     AND pav${i}.isActive = true)`,
-            { [`attributeId${i}`]: attributeId, [`value${i}`]: value },
-          );
+        const filterParts = filters.attributeFilters[i].split(':');
+        if (filterParts.length >= 2) {
+          const attributeId = filterParts[0];
+          const value = filterParts[1];
+          if (attributeId && value) {
+            queryBuilder.andWhere(
+              `EXISTS (SELECT 1 FROM product_attribute_values pav${i}
+                       WHERE pav${i}.productId = product.id
+                       AND pav${i}.attributeId = :attributeId${i}
+                       AND pav${i}.value = :value${i}
+                       AND pav${i}.isActive = true)`,
+              { [`attributeId${i}`]: attributeId, [`value${i}`]: value },
+            );
+          }
         }
       }
     }
@@ -373,7 +449,18 @@ export class ProductService {
       .getMany();
   }
 
-  async getCategoryFilterAttributes(categoryId?: string) {
+  async getCategoryFilterAttributes(
+    categoryId?: string,
+  ): Promise<CategoryFilterResult[]> {
+    const cacheKey = `category_filter_attributes_${categoryId || 'all'}`;
+
+    // Try to get from cache first
+    const cachedResult =
+      await this.cacheManager.get<CategoryFilterResult[]>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.attributeValues', 'attributeValues')
@@ -392,7 +479,7 @@ export class ProductService {
     const products = await queryBuilder.getMany();
 
     // Group attributes by category and collect unique attributes with their values
-    const categoryAttributes = new Map();
+    const categoryAttributes = new Map<string, CategoryAttributeData>();
 
     products.forEach((product) => {
       const catId = product.category?.id || 'uncategorized';
@@ -402,13 +489,16 @@ export class ProductService {
         categoryAttributes.set(catId, {
           categoryId: catId,
           categoryName: catName,
-          attributes: new Map(),
+          attributes: new Map<string, AttributeData>(),
         });
       }
 
       const categoryData = categoryAttributes.get(catId);
+      if (!categoryData) return;
 
       product.attributeValues.forEach((attrValue) => {
+        if (!attrValue.attribute) return;
+
         const attrId = attrValue.attribute.id;
         const attrName = attrValue.attribute.name;
         const displayName = attrValue.attribute.displayName;
@@ -431,33 +521,41 @@ export class ProductService {
         }
 
         // Collect unique values for this attribute
-        categoryData.attributes.get(attrId).values.add(attrValue.value);
+        const attrData = categoryData.attributes.get(attrId);
+        if (attrData) {
+          attrData.values.add(attrValue.value);
+        }
       });
     });
 
     // Convert to desired format
-    const result = Array.from(categoryAttributes.values()).map(
-      (categoryData: any) => ({
-        categoryId: categoryData.categoryId,
-        categoryName: categoryData.categoryName,
-        attributes: Array.from(categoryData.attributes.values())
-          .map((attr: any) => ({
-            id: attr.id,
-            name: attr.name,
-            displayName: attr.displayName,
-            type: attr.type,
-            isRequired: attr.isRequired,
-            isActive: attr.isActive,
-            sortOrder: attr.sortOrder,
-            values: Array.from(attr.values).sort(),
-          }))
-          .sort((a: any, b: any) => a.sortOrder - b.sortOrder),
-      }),
-    );
+    const result: CategoryFilterResult[] = Array.from(
+      categoryAttributes.values(),
+    ).map((categoryData) => ({
+      categoryId: categoryData.categoryId,
+      categoryName: categoryData.categoryName,
+      attributes: Array.from(categoryData.attributes.values())
+        .map((attr) => ({
+          id: attr.id,
+          name: attr.name,
+          displayName: attr.displayName,
+          type: attr.type,
+          isRequired: attr.isRequired,
+          isActive: attr.isActive,
+          sortOrder: attr.sortOrder,
+          values: Array.from(attr.values).sort(),
+        }))
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    }));
 
-    return categoryId
+    const finalResult = categoryId
       ? result.filter((c) => c.categoryId === categoryId)
       : result;
+
+    // Cache the result for 10 minutes
+    await this.cacheManager.set(cacheKey, finalResult, 600000);
+
+    return finalResult;
   }
 
   async getCategoryAttributeValues(categoryId: string, attributeId: string) {

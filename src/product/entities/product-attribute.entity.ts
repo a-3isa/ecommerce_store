@@ -5,9 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { ProductAttributeValue } from './product-attribute-value.entity';
-// import { ProductAttributeValue } from './product-attribute-value.entity';
 
 export enum AttributeType {
   TEXT = 'text',
@@ -19,11 +19,14 @@ export enum AttributeType {
 }
 
 @Entity('product_attributes')
+@Index(['isActive', 'sortOrder'])
+@Index(['type', 'isActive'])
 export class ProductAttribute {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 100, unique: true })
+  @Index()
   name: string; // e.g., "color", "size", "material"
 
   @Column({ length: 100 })
@@ -34,19 +37,19 @@ export class ProductAttribute {
     enum: AttributeType,
     default: AttributeType.TEXT,
   })
+  @Index()
   type: AttributeType;
 
   @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column({ default: true })
+  @Index()
   isRequired: boolean;
 
   @Column({ default: true })
+  @Index()
   isActive: boolean;
-
-  //   @Column({ type: 'simple-json', nullable: true })
-  //   options: string[]; // For select/multiselect types, e.g., ["Red", "Blue", "Green"]
 
   @Column({ type: 'simple-json', nullable: true })
   validationRules: {
@@ -57,9 +60,10 @@ export class ProductAttribute {
   };
 
   @Column({ default: 0 })
+  @Index()
   sortOrder: number;
 
-  @OneToMany(() => ProductAttributeValue, (value) => value.attribute)
+  @OneToMany(() => ProductAttributeValue, (value) => value.attr)
   values: ProductAttributeValue[];
 
   @CreateDateColumn()

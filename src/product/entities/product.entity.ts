@@ -6,6 +6,7 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { ProductGift } from './product-gift.entity';
 import { Category } from 'src/category/entities/category.entity';
@@ -19,11 +20,18 @@ export enum ProductType {
 }
 
 @Entity('products')
+@Index(['isActive', 'createdAt'])
+@Index(['isActive', 'price'])
+@Index(['isActive', 'name'])
+@Index(['category', 'isActive'])
+@Index(['sku'], { unique: true, where: 'sku IS NOT NULL' })
+@Index(['barcode'], { unique: true, where: 'barcode IS NOT NULL' })
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 255 })
+  @Index()
   name: string;
 
   @Column({ length: 255, unique: true })
@@ -32,7 +40,11 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  image: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Index()
   price: number;
 
   @Column({ type: 'int', default: 0 })
@@ -52,6 +64,7 @@ export class Product {
   barcode: string;
 
   @Column({ default: true })
+  @Index()
   isActive: boolean;
 
   @ManyToOne(() => Product, (product) => product.children, { nullable: true })
@@ -64,16 +77,19 @@ export class Product {
   gifts: ProductGift[];
 
   @OneToMany(() => ProductAttributeValue, (value) => value.product)
-  attributeValues: ProductAttributeValue[];
+  attrValues: ProductAttributeValue[];
 
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: true,
   })
+  @Index()
   category: Category;
 
   @CreateDateColumn()
+  @Index()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @Index()
   updatedAt: Date;
 }
