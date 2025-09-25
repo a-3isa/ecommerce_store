@@ -10,7 +10,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductFilterDto } from './dto/product-filter.dto';
 import { Product } from './entities/product.entity';
 import {
   ProductAttribute,
@@ -236,6 +235,151 @@ export class ProductService {
     });
   }
 
+  async searchProducts(
+    categories?: number[], // 🔹 category filter
+    page = 1,
+    limit = 20,
+    sortBy?: 'price' | 'createdAt',
+    order: 'ASC' | 'DESC' = 'ASC',
+    filters?: { [attrId: number]: string[] },
+    search?: string,
+  ) {
+    // 1️⃣ Query products
+    const qb = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoin('product.category', 'category');
+
+    // ✅ Category filter
+    if (categories && categories.length > 0) {
+      qb.andWhere('category.id IN (:...categories)', { categories });
+    }
+
+    // ✅ Search filter
+    if (search) {
+      qb.andWhere(
+        '(product.name LIKE :search OR product.description LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // ✅ Attribute filters
+    if (filters) {
+      let index = 0;
+      for (const [attrId, values] of Object.entries(filters)) {
+        qb.innerJoin(
+          'product.attrValues',
+          `av${index}`,
+          `av${index}.attrId = :attrId${index} AND av${index}.value IN (:...values${index})`,
+          {
+            [`attrId${index}`]: Number(attrId),
+            [`values${index}`]: values,
+          },
+        );
+        index++;
+      }
+    }
+
+    // ✅ Select fields
+    qb.select([
+      'product.id AS id',
+      'product.name AS name',
+      'product.image AS image',
+      'product.price AS price',
+      'product.createdAt AS createdAt',
+      'category.id AS categoryId',
+      'category.name AS categoryName',
+    ]);
+
+    // ✅ Sorting
+    if (sortBy) {
+      qb.orderBy(`product.${sortBy}`, order);
+    }
+
+    // ✅ Pagination
+    qb.offset((page - 1) * limit).limit(limit);
+
+    const products = await qb.getRawMany();
+
+    // 2️⃣ Build attribute filters
+    const rawAttrs: { attrId: number; attrName: string; value: string }[] =
+      await this.productRepository
+        .createQueryBuilder('product')
+        .leftJoin('product.category', 'category')
+        .leftJoin('product.attrValues', 'attrValue')
+        .leftJoin('attrValue.attr', 'attr')
+        .where(
+          categories && categories.length > 0
+            ? 'category.id IN (:...categories)'
+            : '1=1',
+          { categories },
+        )
+        .andWhere(
+          search
+            ? '(product.name LIKE :search OR product.description LIKE :search)'
+            : '1=1',
+          { search: `%${search ?? ''}%` },
+        )
+        .select([
+          'attr.id AS attrId',
+          'attr.name AS attrName',
+          'attrValue.value AS value',
+        ])
+        .distinct(true)
+        .getRawMany();
+
+    const attrMap = new Map<
+      number,
+      { id: number; name: string; values: string[] }
+    >();
+
+    for (const row of rawAttrs) {
+      if (!row.attrId) continue;
+      if (!attrMap.has(row.attrId)) {
+        attrMap.set(row.attrId, {
+          id: row.attrId,
+          name: row.attrName ?? '',
+          values: [],
+        });
+      }
+      if (row.value) {
+        const entry = attrMap.get(row.attrId)!;
+        if (!entry.values.includes(row.value)) {
+          entry.values.push(row.value);
+        }
+      }
+    }
+
+    const availableAttributes = Array.from(attrMap.values());
+
+    // 3️⃣ Build category filters (unique categories from products)
+    const rawCats: { id: number; name: string }[] = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoin('product.category', 'category')
+      .where(
+        search
+          ? '(product.name LIKE :search OR product.description LIKE :search)'
+          : '1=1',
+        { search: `%${search ?? ''}%` },
+      )
+      .select(['category.id AS id', 'category.name AS name'])
+      .distinct(true)
+      .getRawMany();
+
+    const availableCategories = rawCats.map((c) => ({
+      id: c.id,
+      name: c.name,
+    }));
+
+    // 4️⃣ Final return
+    return {
+      products,
+      filters: {
+        categories: availableCategories,
+        attributes: availableAttributes,
+      },
+    };
+  }
+
   // Admin methods for attribute management
   async createAttribute(createAttributeDto: {
     name: string;
@@ -310,277 +454,5 @@ export class ProductService {
     }
 
     return attribute;
-  }
-
-  // Filtering and search methods
-  async findWithFilters(filters: ProductFilterDto): Promise<{
-    products: Product[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    const queryBuilder = this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.attributeValues', 'attributeValues')
-      .leftJoinAndSelect('attributeValues.attribute', 'attribute')
-      .leftJoinAndSelect('product.category', 'category')
-      .leftJoinAndSelect('product.images', 'images');
-
-    // Apply filters
-    if (filters.search) {
-      queryBuilder.andWhere(
-        '(product.name LIKE :search OR product.description LIKE :search OR product.sku LIKE :search)',
-        { search: `%${filters.search}%` },
-      );
-    }
-
-    if (filters.categoryId) {
-      queryBuilder.andWhere('product.categoryId = :categoryId', {
-        categoryId: filters.categoryId,
-      });
-    }
-
-    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-      queryBuilder.andWhere('product.price BETWEEN :minPrice AND :maxPrice', {
-        minPrice: filters.minPrice || 0,
-        maxPrice: filters.maxPrice || 999999,
-      });
-    }
-
-    if (filters.isActive !== undefined) {
-      queryBuilder.andWhere('product.isActive = :isActive', {
-        isActive: filters.isActive,
-      });
-    }
-
-    // Apply attribute filters
-    if (filters.attributeFilters && filters.attributeFilters.length > 0) {
-      for (let i = 0; i < filters.attributeFilters.length; i++) {
-        const filterParts = filters.attributeFilters[i].split(':');
-        if (filterParts.length >= 2) {
-          const attributeId = filterParts[0];
-          const value = filterParts[1];
-          if (attributeId && value) {
-            queryBuilder.andWhere(
-              `EXISTS (SELECT 1 FROM product_attribute_values pav${i}
-                       WHERE pav${i}.productId = product.id
-                       AND pav${i}.attributeId = :attributeId${i}
-                       AND pav${i}.value = :value${i}
-                       AND pav${i}.isActive = true)`,
-              { [`attributeId${i}`]: attributeId, [`value${i}`]: value },
-            );
-          }
-        }
-      }
-    }
-
-    // Apply sorting
-    const validSortFields = ['name', 'price', 'createdAt', 'updatedAt'];
-    const sortByField = filters.sortBy ?? 'createdAt';
-    const sortBy = validSortFields.includes(sortByField)
-      ? `product.${sortByField}`
-      : 'product.createdAt';
-
-    queryBuilder.orderBy(sortBy, filters.sortOrder);
-
-    // Apply pagination
-    const page = filters.page || 1;
-    const limit = Math.min(filters.limit || 10, 100);
-    const skip = (page - 1) * limit;
-
-    queryBuilder.skip(skip).take(limit);
-
-    const [products, total] = await queryBuilder.getManyAndCount();
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      products,
-      total,
-      page,
-      limit,
-      totalPages,
-    };
-  }
-
-  async searchProducts(searchTerm: string): Promise<Product[]> {
-    return this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.attributeValues', 'attributeValues')
-      .leftJoinAndSelect('attributeValues.attribute', 'attribute')
-      .leftJoinAndSelect('product.category', 'category')
-      .where(
-        'product.name LIKE :search OR product.description LIKE :search OR product.sku LIKE :search',
-        { search: `%${searchTerm}%` },
-      )
-      .andWhere('product.isActive = :isActive', { isActive: true })
-      .orderBy('product.name', 'ASC')
-      .getMany();
-  }
-
-  async getProductsByCategory(categoryId: string): Promise<Product[]> {
-    return this.productRepository.find({
-      where: { category: { id: categoryId }, isActive: true },
-      relations: [
-        'attributeValues',
-        'attributeValues.attribute',
-        'category',
-        'variants',
-        'images',
-      ],
-      order: { name: 'ASC' },
-    });
-  }
-
-  async getProductsByAttribute(
-    attributeId: string,
-    value: string,
-  ): Promise<Product[]> {
-    return this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.attributeValues', 'attributeValues')
-      .leftJoinAndSelect('attributeValues.attribute', 'attribute')
-      .leftJoinAndSelect('product.category', 'category')
-      .where('attributeValues.attributeId = :attributeId', { attributeId })
-      .andWhere('attributeValues.value = :value', { value })
-      .andWhere('attributeValues.isActive = :isActive', { isActive: true })
-      .andWhere('product.isActive = :productActive', { productActive: true })
-      .orderBy('product.name', 'ASC')
-      .getMany();
-  }
-
-  async getCategoryFilterAttributes(
-    categoryId?: string,
-  ): Promise<CategoryFilterResult[]> {
-    const cacheKey = `category_filter_attributes_${categoryId || 'all'}`;
-
-    // Try to get from cache first
-    const cachedResult =
-      await this.cacheManager.get<CategoryFilterResult[]>(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
-    }
-
-    const queryBuilder = this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.attributeValues', 'attributeValues')
-      .leftJoinAndSelect('attributeValues.attribute', 'attribute')
-      .leftJoinAndSelect('product.category', 'category')
-      .where('product.isActive = :isActive', { isActive: true })
-      .andWhere('attributeValues.isActive = :attrActive', { attrActive: true })
-      .andWhere('attribute.isActive = :attributeActive', {
-        attributeActive: true,
-      });
-
-    if (categoryId) {
-      queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
-    }
-
-    const products = await queryBuilder.getMany();
-
-    // Group attributes by category and collect unique attributes with their values
-    const categoryAttributes = new Map<string, CategoryAttributeData>();
-
-    products.forEach((product) => {
-      const catId = product.category?.id || 'uncategorized';
-      const catName = product.category?.name || 'Uncategorized';
-
-      if (!categoryAttributes.has(catId)) {
-        categoryAttributes.set(catId, {
-          categoryId: catId,
-          categoryName: catName,
-          attributes: new Map<string, AttributeData>(),
-        });
-      }
-
-      const categoryData = categoryAttributes.get(catId);
-      if (!categoryData) return;
-
-      product.attributeValues.forEach((attrValue) => {
-        if (!attrValue.attribute) return;
-
-        const attrId = attrValue.attribute.id;
-        const attrName = attrValue.attribute.name;
-        const displayName = attrValue.attribute.displayName;
-        const type = attrValue.attribute.type;
-        const isRequired = attrValue.attribute.isRequired;
-        const isActive = attrValue.attribute.isActive;
-        const sortOrder = attrValue.attribute.sortOrder;
-
-        if (!categoryData.attributes.has(attrId)) {
-          categoryData.attributes.set(attrId, {
-            id: attrId,
-            name: attrName,
-            displayName: displayName,
-            type: type,
-            isRequired: isRequired,
-            isActive: isActive,
-            sortOrder: sortOrder,
-            values: new Set<string>(),
-          });
-        }
-
-        // Collect unique values for this attribute
-        const attrData = categoryData.attributes.get(attrId);
-        if (attrData) {
-          attrData.values.add(attrValue.value);
-        }
-      });
-    });
-
-    // Convert to desired format
-    const result: CategoryFilterResult[] = Array.from(
-      categoryAttributes.values(),
-    ).map((categoryData) => ({
-      categoryId: categoryData.categoryId,
-      categoryName: categoryData.categoryName,
-      attributes: Array.from(categoryData.attributes.values())
-        .map((attr) => ({
-          id: attr.id,
-          name: attr.name,
-          displayName: attr.displayName,
-          type: attr.type,
-          isRequired: attr.isRequired,
-          isActive: attr.isActive,
-          sortOrder: attr.sortOrder,
-          values: Array.from(attr.values).sort(),
-        }))
-        .sort((a, b) => a.sortOrder - b.sortOrder),
-    }));
-
-    const finalResult = categoryId
-      ? result.filter((c) => c.categoryId === categoryId)
-      : result;
-
-    // Cache the result for 10 minutes
-    await this.cacheManager.set(cacheKey, finalResult, 600000);
-
-    return finalResult;
-  }
-
-  async getCategoryAttributeValues(categoryId: string, attributeId: string) {
-    if (!categoryId) {
-      throw new BadRequestException('Category ID is required');
-    }
-
-    const products = await this.productRepository.find({
-      where: {
-        category: { id: categoryId },
-        isActive: true,
-      },
-      relations: ['attributeValues', 'attributeValues.attribute'],
-    });
-
-    const attributeValues = new Set<string>();
-
-    products.forEach((product) => {
-      product.attributeValues.forEach((attrValue) => {
-        if (attrValue.attribute.id === attributeId && attrValue.isActive) {
-          attributeValues.add(attrValue.value);
-        }
-      });
-    });
-
-    return Array.from(attributeValues).sort();
   }
 }

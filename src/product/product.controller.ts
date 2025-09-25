@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
   HttpStatus,
   HttpCode,
   UseInterceptors,
@@ -17,9 +16,7 @@ import {
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductFilterDto } from './dto/product-filter.dto';
-import { CategoryAttributeFilterDto } from './dto/category-attribute-filter.dto';
-import { CacheMedium, CacheLong } from './decorators/cache.decorator';
+import { CacheMedium } from './decorators/cache.decorator';
 import { LogMethod } from './decorators/logging.decorator';
 import { ValidateRequest } from './decorators/validation.decorator';
 
@@ -34,76 +31,6 @@ export class ProductController {
   @ValidateRequest()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
-  }
-
-  @Get()
-  @CacheMedium()
-  @LogMethod()
-  @ValidateRequest()
-  findAll(@Query() filters: ProductFilterDto) {
-    return this.productService.findWithFilters(filters);
-  }
-
-  @Get('search')
-  @CacheMedium()
-  @LogMethod()
-  @ValidateRequest()
-  searchProducts(@Query('q') searchTerm: string) {
-    if (!searchTerm || searchTerm.trim().length < 2) {
-      throw new BadRequestException(
-        'Search term must be at least 2 characters long',
-      );
-    }
-    return this.productService.searchProducts(searchTerm.trim());
-  }
-
-  @Get('category/:categoryId')
-  @CacheMedium()
-  @LogMethod()
-  getProductsByCategory(@Param('categoryId') categoryId: string) {
-    if (!categoryId) {
-      throw new BadRequestException('Category ID is required');
-    }
-    return this.productService.getProductsByCategory(categoryId);
-  }
-
-  @Get('attribute/:attributeId/:value')
-  @CacheMedium()
-  @LogMethod()
-  getProductsByAttribute(
-    @Param('attributeId') attributeId: string,
-    @Param('value') value: string,
-  ) {
-    if (!attributeId || !value) {
-      throw new BadRequestException('Both attribute ID and value are required');
-    }
-    return this.productService.getProductsByAttribute(attributeId, value);
-  }
-
-  @Get('category-filters/attributes')
-  @CacheLong()
-  @LogMethod()
-  @ValidateRequest()
-  getCategoryFilterAttributes(@Query() filters: CategoryAttributeFilterDto) {
-    return this.productService.getCategoryFilterAttributes(filters.categoryId);
-  }
-
-  @Get('category-filters/:categoryId/attribute/:attributeId/values')
-  @CacheMedium()
-  @LogMethod()
-  getCategoryAttributeValues(
-    @Param('categoryId') categoryId: string,
-    @Param('attributeId') attributeId: string,
-  ) {
-    if (!categoryId || !attributeId) {
-      throw new BadRequestException(
-        'Both category ID and attribute ID are required',
-      );
-    }
-    return this.productService.getCategoryAttributeValues(
-      categoryId,
-      attributeId,
-    );
   }
 
   @Get(':id')
