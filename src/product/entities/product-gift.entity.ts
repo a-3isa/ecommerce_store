@@ -1,14 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Product } from './product.entity';
+import { AbstractEntity } from 'src/common/entities/abstract.entity';
 
-@Entity('product_gifts')
-export class ProductGift {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+@Entity('gift_rules')
+export class GiftRule extends AbstractEntity {
+  // The "main" product you must buy
+  @ManyToOne(() => Product, { nullable: false })
+  public triggerProduct: Product;
 
-  @ManyToOne(() => Product, (product) => product.gifts, { onDelete: 'CASCADE' })
-  product: Product;
+  // How many of that product must be purchased
+  @Column({ default: 1 })
+  public minQuantity: number;
 
-  @ManyToOne(() => Product, { onDelete: 'CASCADE' })
-  giftProduct: Product;
+  // The gift product to be given
+  @ManyToOne(() => Product, { nullable: false })
+  public giftProduct: Product;
+
+  // How many gifts to give per trigger
+  @Column({ default: 1 })
+  public giftQuantity: number;
+
+  @Column({ default: true })
+  public isActive: boolean;
 }

@@ -3,16 +3,16 @@ import { IsOptional, IsString, IsArray, IsObject } from 'class-validator';
 export class CategoryAttributeFilterDto {
   @IsString()
   @IsOptional()
-  categoryId?: string;
+  public categoryId?: string;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  attributeIds?: string[];
+  public attributeIds?: string[];
 
   @IsObject()
   @IsOptional()
-  filters?: {
+  public filters?: {
     isActive?: boolean;
     isRequired?: boolean;
     type?: string;
@@ -20,9 +20,9 @@ export class CategoryAttributeFilterDto {
 }
 
 export class CategoryAttributeResponseDto {
-  categoryId: string;
-  categoryName: string;
-  attributes: {
+  public categoryId: string;
+  public categoryName: string;
+  public attributes: {
     id: string;
     name: string;
     displayName: string;

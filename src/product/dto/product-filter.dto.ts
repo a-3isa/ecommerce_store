@@ -12,63 +12,63 @@ import { Type } from 'class-transformer';
 export class ProductFilterDto {
   @IsOptional()
   @IsString()
-  search?: string; // Search in name, description, sku
+  public search?: string; // Search in name, description, sku
 
   @IsOptional()
   @IsString()
-  categoryId?: string;
+  public categoryId?: string;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  minPrice?: number;
+  public minPrice?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  maxPrice?: number;
+  public maxPrice?: number;
 
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean = true;
+  public isActive?: boolean = true;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  attributeFilters?: string[]; // Array of "attributeId:value" pairs
+  public attributeFilters?: string[]; // Array of "attributeId:value" pairs
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page?: number = 1;
+  public page?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   @Max(100)
-  limit?: number = 10;
+  public limit?: number = 10;
 
   @IsOptional()
   @IsString()
-  sortBy?: string = 'createdAt'; // name, price, createdAt, updatedAt
+  public sortBy?: string = 'createdAt'; // name, price, createdAt, updatedAt
 
   @IsOptional()
   @IsString()
-  sortOrder?: 'ASC' | 'DESC' = 'DESC';
+  public sortOrder?: 'ASC' | 'DESC' = 'DESC';
 }
 
 export class AttributeFilterDto {
   @IsString()
-  attributeId: string;
+  public attributeId: string;
 
   @IsString()
-  value: string;
+  public value: string;
 
   @IsOptional()
   @IsString()
-  operator?: 'equals' | 'contains' | 'in' = 'equals';
+  public operator?: 'equals' | 'contains' | 'in' = 'equals';
 }

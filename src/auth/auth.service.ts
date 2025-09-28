@@ -22,7 +22,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(
+  public async register(
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
     const { username, email, password } = authCredentialsDto;
@@ -35,7 +35,7 @@ export class AuthService {
       password: hashedPassword,
     });
     try {
-      await this.userRepository.save(user);
+      await this.userRepository.insert(user);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
@@ -48,7 +48,7 @@ export class AuthService {
     }
   }
 
-  async login(
+  public async login(
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
     const { email, password } = authCredentialsDto;
@@ -62,7 +62,7 @@ export class AuthService {
     throw new UnauthorizedException();
   }
 
-  async adminRegister(
+  public async adminRegister(
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
     const { username, email, password } = authCredentialsDto;
@@ -77,7 +77,7 @@ export class AuthService {
     });
     console.log(user);
     try {
-      await this.userRepository.save(user);
+      await this.userRepository.insert(user);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };

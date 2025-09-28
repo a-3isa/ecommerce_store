@@ -1,14 +1,7 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, Index } from 'typeorm';
 import { Product } from './product.entity';
 import { ProductAttribute } from './product-attribute.entity';
+import { AbstractEntity } from 'src/common/entities/abstract.entity';
 
 @Entity('product_attribute_values')
 @Index(['product', 'attribute'], { unique: true })
@@ -16,33 +9,24 @@ import { ProductAttribute } from './product-attribute.entity';
 @Index(['attribute', 'isActive'])
 @Index(['attribute', 'value'])
 @Index(['product', 'attribute', 'isActive'])
-export class ProductAttributeValue {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class ProductAttributeValue extends AbstractEntity {
   @ManyToOne(() => Product, (product) => product.attrValues, {
     onDelete: 'CASCADE',
   })
   @Index()
-  product: Product;
+  public product: Product;
 
   @ManyToOne(() => ProductAttribute, (attribute) => attribute.values, {
     onDelete: 'CASCADE',
   })
   @Index()
-  attr: ProductAttribute;
+  public attr: ProductAttribute;
 
   @Column({ type: 'text' })
   @Index()
-  value: string;
+  public value: string;
 
   @Column({ default: true })
   @Index()
-  isActive: boolean;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  public isActive: boolean;
 }

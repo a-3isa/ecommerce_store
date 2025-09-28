@@ -9,7 +9,7 @@ import { UserRole } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 

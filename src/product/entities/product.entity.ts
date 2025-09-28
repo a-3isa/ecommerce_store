@@ -1,16 +1,8 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
-import { ProductGift } from './product-gift.entity';
+import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
+// import { ProductGift } from './product-gift.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { ProductAttributeValue } from './product-attribute-value.entity';
+import { AbstractEntity } from 'src/common/entities/abstract.entity';
 
 export enum ProductType {
   SINGLE = 'single',
@@ -26,70 +18,55 @@ export enum ProductType {
 @Index(['category', 'isActive'])
 @Index(['sku'], { unique: true, where: 'sku IS NOT NULL' })
 @Index(['barcode'], { unique: true, where: 'barcode IS NOT NULL' })
-export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ length: 255 })
-  @Index()
-  name: string;
-
+export class Product extends AbstractEntity {
   @Column({ length: 255, unique: true })
-  slug: string;
+  public slug: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  public description: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  image: string;
+  public image: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   @Index()
-  price: number;
+  public price: number;
 
   @Column({ type: 'int', default: 0 })
-  stock: number;
+  public stock: number;
 
   @Column({
     type: 'enum',
     enum: ProductType,
     default: ProductType.SINGLE,
   })
-  type: ProductType;
+  public type: ProductType;
 
   @Column({ length: 100, unique: true, nullable: true })
-  sku: string;
+  public sku: string;
 
   @Column({ length: 100, unique: true, nullable: true })
-  barcode: string;
+  public barcode: string;
 
   @Column({ default: true })
   @Index()
-  isActive: boolean;
+  public isActive: boolean;
 
   @ManyToOne(() => Product, (product) => product.children, { nullable: true })
-  parent: Product;
+  public parent: Product;
 
   @OneToMany(() => Product, (product) => product.parent)
-  children: Product[];
+  public children: Product[];
 
-  @OneToMany(() => ProductGift, (gift) => gift.product)
-  gifts: ProductGift[];
+  // @OneToMany(() => ProductGift, (gift) => gift.product)
+  // public gifts: ProductGift[];
 
   @OneToMany(() => ProductAttributeValue, (value) => value.product)
-  attrValues: ProductAttributeValue[];
+  public attrValues: ProductAttributeValue[];
 
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: true,
   })
   @Index()
-  category: Category;
-
-  @CreateDateColumn()
-  @Index()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  @Index()
-  updatedAt: Date;
+  public category: Category;
 }

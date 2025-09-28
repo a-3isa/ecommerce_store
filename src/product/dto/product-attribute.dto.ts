@@ -10,35 +10,35 @@ import { AttributeType } from '../entities/product-attribute.entity';
 
 export class CreateProductAttributeDto {
   @IsString()
-  name: string;
+  public name: string;
 
   @IsString()
-  displayName: string;
+  public displayName: string;
 
   @IsEnum(AttributeType)
   @IsOptional()
-  type?: AttributeType = AttributeType.TEXT;
+  public type?: AttributeType = AttributeType.TEXT;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsBoolean()
   @IsOptional()
-  isRequired?: boolean = false;
+  public isRequired?: boolean = false;
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean = true;
+  public isActive?: boolean = true;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  options?: string[];
+  public options?: string[];
 
   @IsObject()
   @IsOptional()
-  validationRules?: {
+  public validationRules?: {
     min?: number;
     max?: number;
     pattern?: string;
@@ -46,42 +46,42 @@ export class CreateProductAttributeDto {
   };
 
   @IsOptional()
-  sortOrder?: number = 0;
+  public sortOrder?: number = 0;
 }
 
 export class UpdateProductAttributeDto {
   @IsString()
   @IsOptional()
-  name?: string;
+  public name?: string;
 
   @IsString()
   @IsOptional()
-  displayName?: string;
+  public displayName?: string;
 
   @IsEnum(AttributeType)
   @IsOptional()
-  type?: AttributeType;
+  public type?: AttributeType;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsBoolean()
   @IsOptional()
-  isRequired?: boolean;
+  public isRequired?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean;
+  public isActive?: boolean;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  options?: string[];
+  public options?: string[];
 
   @IsObject()
   @IsOptional()
-  validationRules?: {
+  public validationRules?: {
     min?: number;
     max?: number;
     pattern?: string;
@@ -89,19 +89,19 @@ export class UpdateProductAttributeDto {
   };
 
   @IsOptional()
-  sortOrder?: number;
+  public sortOrder?: number;
 }
 
 export class CreateProductAttributeValueDto {
   @IsString()
-  attributeId: string;
+  public attributeId: string;
 
   @IsString()
-  value: string;
+  public value: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: {
+  public metadata?: {
     unit?: string;
     currency?: string;
     locale?: string;
@@ -109,17 +109,17 @@ export class CreateProductAttributeValueDto {
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean = true;
+  public isActive?: boolean = true;
 }
 
 export class UpdateProductAttributeValueDto {
   @IsString()
   @IsOptional()
-  value?: string;
+  public value?: string;
 
   @IsObject()
   @IsOptional()
-  metadata?: {
+  public metadata?: {
     unit?: string;
     currency?: string;
     locale?: string;
@@ -127,5 +127,5 @@ export class UpdateProductAttributeValueDto {
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean;
+  public isActive?: boolean;
 }

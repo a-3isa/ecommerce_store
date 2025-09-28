@@ -12,27 +12,27 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepo: Repository<Category>,
   ) {}
-  async create(createCategoryDto: CreateCategoryDto) {
+  public async create(createCategoryDto: CreateCategoryDto) {
     const category = this.categoryRepo.create(createCategoryDto);
-    await this.categoryRepo.save(category);
+    await this.categoryRepo.insert(category);
     return category;
   }
 
-  async findMainCategories() {
+  public async findMainCategories() {
     return this.categoryRepo.find({
       select: { id: true, name: true },
       where: { parent: IsNull() },
     });
   }
 
-  async findSubCategories(parentId: string) {
+  public async findSubCategories(parentId: string) {
     return this.categoryRepo.find({
       select: { id: true, name: true },
       where: { parent: { id: parentId } },
     });
   }
 
-  async getCategoryProducts(
+  public async getCategoryProducts(
     categoryId: string,
     page: number,
     limit = 20,
@@ -129,12 +129,12 @@ export class CategoryService {
     };
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  public async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     await this.categoryRepo.update(id, updateCategoryDto);
     return await this.categoryRepo.findOne({ where: { id } });
   }
 
-  async remove(id: string) {
+  public async remove(id: string) {
     const category = await this.categoryRepo.findOne({ where: { id } });
     if (category) {
       await this.categoryRepo.remove(category);

@@ -10,10 +10,10 @@ export class AuthCredentialsDto {
   @IsString()
   @MinLength(4)
   @MaxLength(12)
-  username: string;
+  public username: string;
 
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  public email: string;
 
   @IsString()
   @MinLength(8)
@@ -21,5 +21,5 @@ export class AuthCredentialsDto {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'password is too weak',
   })
-  password: string;
+  public password: string;
 }

@@ -5,7 +5,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InsertResult, Repository } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -69,7 +69,7 @@ export class ProductService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  public async create(createProductDto: CreateProductDto): Promise<Product> {
     const product = this.productRepository.create({
       name: createProductDto.name,
       slug: createProductDto.slug,
@@ -82,24 +82,24 @@ export class ProductService {
       isActive: createProductDto.isActive,
     });
 
-    const savedProduct = await this.productRepository.save(product);
+    const savedProduct = await this.productRepository.insert(product);
 
-    if (!savedProduct.id) {
+    if (!savedProduct.identifiers[0]?.id) {
       throw new BadRequestException('Failed to save product');
     }
 
     // Handle EAV attributes if provided
     if (createProductDto.attributes && createProductDto.attributes.length > 0) {
       await this.createProductAttributes(
-        savedProduct.id,
+        savedProduct.identifiers[0]?.id,
         createProductDto.attributes,
       );
     }
 
-    return this.findOne(savedProduct.id);
+    return this.findOne(savedProduct.identifiers[0]?.id);
   }
 
-  async findAll(): Promise<Product[]> {
+  public async findAll(): Promise<Product[]> {
     return this.productRepository.find({
       relations: [
         'attributeValues',
@@ -111,7 +111,7 @@ export class ProductService {
     });
   }
 
-  async findOne(id: string): Promise<Product> {
+  public async findOne(id: string): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
       relations: [
@@ -130,7 +130,7 @@ export class ProductService {
     return product;
   }
 
-  async update(
+  public async update(
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
@@ -149,7 +149,7 @@ export class ProductService {
       isActive: updateProductDto.isActive ?? product.isActive,
     });
 
-    await this.productRepository.save(product);
+    await this.productRepository.insert(product);
 
     // Handle EAV attributes if provided
     if (updateProductDto.attributes) {
@@ -159,13 +159,13 @@ export class ProductService {
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  public async remove(id: string): Promise<void> {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
   }
 
   // EAV-specific methods - NO AUTO-CREATION
-  async createProductAttributes(
+  public async createProductAttributes(
     productId: string,
     attributes: Array<{
       attributeId: string;
@@ -201,11 +201,11 @@ export class ProductService {
         isActive: attr.isActive ?? true,
       });
 
-      await this.attributeValueRepository.save(attributeValue);
+      await this.attributeValueRepository.insert(attributeValue);
     }
   }
 
-  async updateProductAttributes(
+  public async updateProductAttributes(
     productId: string,
     attributes: Array<{
       attributeId: string;
@@ -223,7 +223,7 @@ export class ProductService {
     await this.createProductAttributes(productId, attributes);
   }
 
-  async getProductAttributes(
+  public async getProductAttributes(
     productId: string,
   ): Promise<ProductAttributeValue[]> {
     return this.attributeValueRepository.find({
@@ -235,7 +235,7 @@ export class ProductService {
     });
   }
 
-  async searchProducts(
+  public async searchProducts(
     categories?: number[], // 🔹 category filter
     page = 1,
     limit = 20,
@@ -381,7 +381,7 @@ export class ProductService {
   }
 
   // Admin methods for attribute management
-  async createAttribute(createAttributeDto: {
+  public async createAttribute(createAttributeDto: {
     name: string;
     displayName: string;
     type?: AttributeType;
@@ -390,15 +390,15 @@ export class ProductService {
     isActive?: boolean;
     validationRules?: ValidationRules;
     sortOrder?: number;
-  }): Promise<ProductAttribute> {
+  }): Promise<InsertResult> {
     const attribute = this.attributeRepository.create(createAttributeDto);
-    return this.attributeRepository.save(attribute);
+    return this.attributeRepository.insert(attribute);
   }
 
-  async updateAttribute(
+  public async updateAttribute(
     id: string,
     updateAttributeDto: Partial<ProductAttribute>,
-  ): Promise<ProductAttribute> {
+  ): Promise<InsertResult> {
     const attribute = await this.attributeRepository.findOne({
       where: { id },
     });
@@ -408,10 +408,10 @@ export class ProductService {
     }
 
     Object.assign(attribute, updateAttributeDto);
-    return this.attributeRepository.save(attribute);
+    return this.attributeRepository.insert(attribute);
   }
 
-  async deleteAttribute(id: string): Promise<void> {
+  public async deleteAttribute(id: string): Promise<void> {
     const attribute = await this.attributeRepository.findOne({
       where: { id },
     });
@@ -423,7 +423,7 @@ export class ProductService {
     await this.attributeRepository.remove(attribute);
   }
 
-  async getAllAttributes(): Promise<ProductAttribute[]> {
+  public async getAllAttributes(): Promise<ProductAttribute[]> {
     const cacheKey = 'all_active_attributes';
 
     // Try to get from cache first
@@ -444,7 +444,7 @@ export class ProductService {
     return result;
   }
 
-  async getAttributeById(id: string): Promise<ProductAttribute> {
+  public async getAttributeById(id: string): Promise<ProductAttribute> {
     const attribute = await this.attributeRepository.findOne({
       where: { id, isActive: true },
     });

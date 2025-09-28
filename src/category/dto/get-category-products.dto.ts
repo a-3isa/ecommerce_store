@@ -6,25 +6,25 @@ export class GetCategoryProductsDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  page: number = 1;
+  public page: number = 1;
 
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   @IsOptional()
-  limit: number = 20;
+  public limit: number = 20;
 
   @IsEnum(['price', 'createdAt'], {
     message: 'sortBy must be either price or createdAt',
   })
   @IsOptional()
-  sortBy?: 'price' | 'createdAt';
+  public sortBy?: 'price' | 'createdAt';
 
   @IsEnum(['ASC', 'DESC'])
   @IsOptional()
-  order: 'ASC' | 'DESC' = 'ASC';
+  public order: 'ASC' | 'DESC' = 'ASC';
 
   // Example: filters[1]=red&filters[2]=XL
   @IsOptional()
-  filters?: Record<string, string | string[]>;
+  public filters?: Record<string, string | string[]>;
 }

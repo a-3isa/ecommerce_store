@@ -3,16 +3,16 @@ import { IsString, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
-  name: string;
+  public name: string;
 
   @IsString()
-  slug: string;
+  public slug: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  public description?: string;
 
   @IsOptional()
   @IsUUID()
-  parentId?: string;
+  public parentId?: string;
 }

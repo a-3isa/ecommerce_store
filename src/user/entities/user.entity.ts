@@ -8,24 +8,24 @@ export enum UserRole {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  public id: string;
 
   @Column({ length: 100 })
-  username: string;
+  public username: string;
 
   @Column({ unique: true })
-  email: string;
+  public email: string;
 
   @Column()
-  password: string;
+  public password: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.USER,
   })
-  role: UserRole;
+  public role: UserRole;
 
   @Column({ type: 'text', nullable: true })
-  address: string;
+  public address: string;
 }

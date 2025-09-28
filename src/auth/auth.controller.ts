@@ -8,13 +8,13 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/register')
-  async register(@Body() authCredentialsDto: AuthCredentialsDto) {
+  public async register(@Body() authCredentialsDto: AuthCredentialsDto) {
     await this.authService.register(authCredentialsDto);
     return 'Welcome to the store';
   }
 
   @Post('/login')
-  login(
+  public login(
     @Body() authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
     return this.authService.login(authCredentialsDto);
@@ -22,7 +22,7 @@ export class AuthController {
 
   @UseGuards(RoleGuard)
   @Post('/adminRegister')
-  async adminRegister(@Body() authCredentialsDto: AuthCredentialsDto) {
+  public async adminRegister(@Body() authCredentialsDto: AuthCredentialsDto) {
     await this.authService.adminRegister(authCredentialsDto);
     return 'Welcome to the store';
   }

@@ -1,42 +1,23 @@
+import { AbstractEntity } from 'src/common/entities/abstract.entity';
 import { Product } from 'src/product/entities/product.entity';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('categories')
-export class Category {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ length: 255 })
-  name: string;
-
+export class Category extends AbstractEntity {
   @Column({ length: 255, unique: true })
-  slug: string;
+  public slug: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  public description: string;
 
   @ManyToOne(() => Category, (category) => category.children, {
     nullable: true,
   })
-  parent: Category;
+  public parent: Category;
 
   @OneToMany(() => Category, (category) => category.parent)
-  children: Category[];
+  public children: Category[];
 
   @OneToMany(() => Product, (product) => product.category)
-  products: Product[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  public products: Product[];
 }

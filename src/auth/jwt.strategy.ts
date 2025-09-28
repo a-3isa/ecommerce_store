@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }
-  async validate(payload: JwtPayload): Promise<User> {
+  public async validate(payload: JwtPayload): Promise<User> {
     const { email } = payload;
     const user: User | null = await this.userRepository.findOne({
       where: { email },

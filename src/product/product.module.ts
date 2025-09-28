@@ -4,7 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { Product } from './entities/product.entity';
-import { ProductGift } from './entities/product-gift.entity';
+// import { ProductGift } from './entities/product-gift.entity';
 import { ProductAttribute } from './entities/product-attribute.entity';
 import { ProductAttributeValue } from './entities/product-attribute-value.entity';
 
@@ -12,7 +12,7 @@ import { ProductAttributeValue } from './entities/product-attribute-value.entity
   imports: [
     TypeOrmModule.forFeature([
       Product,
-      ProductGift,
+      // ProductGift,
       ProductAttribute,
       ProductAttributeValue,
     ]),

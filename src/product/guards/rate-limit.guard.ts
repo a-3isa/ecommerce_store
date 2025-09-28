@@ -25,7 +25,7 @@ export class ProductRateLimitGuard implements CanActivate {
 
   constructor(private reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     const request: RequestWithConnection = context.switchToHttp().getRequest();
     const response: ResponseWithHeader = context.switchToHttp().getResponse();
 

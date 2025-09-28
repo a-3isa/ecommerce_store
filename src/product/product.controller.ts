@@ -29,14 +29,14 @@ export class ProductController {
   @HttpCode(HttpStatus.CREATED)
   @LogMethod()
   @ValidateRequest()
-  create(@Body() createProductDto: CreateProductDto) {
+  public create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
 
   @Get(':id')
   @CacheMedium()
   @LogMethod()
-  async findOne(@Param('id') id: string) {
+  public async findOne(@Param('id') id: string) {
     if (!id) {
       throw new BadRequestException('Product ID is required');
     }
@@ -53,7 +53,7 @@ export class ProductController {
   @HttpCode(HttpStatus.OK)
   @LogMethod()
   @ValidateRequest()
-  async update(
+  public async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
@@ -74,7 +74,7 @@ export class ProductController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @LogMethod()
-  async remove(@Param('id') id: string) {
+  public async remove(@Param('id') id: string) {
     if (!id) {
       throw new BadRequestException('Product ID is required');
     }

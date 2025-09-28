@@ -1,87 +1,51 @@
-# EAV Model Implementation for Products
+# TODO: Declare Scope for Class Elements
 
-## Current Progress: Complete ✅
+## Files to Edit
 
-### ✅ Completed
+- [x] src/user/user.service.ts
+- [x] src/user/user.module.ts
+- [x] src/user/user.controller.ts
+- [x] src/user/entities/user.entity.ts
+- [x] src/user/dto/update-user.dto.ts
+- [x] src/user/dto/create-user.dto.ts
+- [ ] src/static_pages/static_pages.service.ts
+- [ ] src/static_pages/static_pages.controller.ts.ts
+- [ ] src/static_pages/entities/static-pages.entity.ts
+- [ ] src/static_pages/entities/acq.entity.ts
+- [ ] src/static_pages/dtos/static_page.dto.ts
+- [x] src/product/product.service.ts
+- [ ] src/product/product.module.ts
+- [x] src/product/product.controller.ts
+- [x] src/product/guards/rate-limit.guard.ts
+- [x] src/product/entities/product.entity.ts
+- [x] src/product/entities/product-gift.entity.ts
+- [x] src/product/entities/product-attribute.entity.ts
+- [x] src/product/entities/product-attribute-value.entity.ts
+- [x] src/product/dto/update-product.dto.ts
+- [x] src/product/dto/product-filter.dto.ts
+- [x] src/product/dto/product-attribute.dto.ts
+- [x] src/product/dto/create-product.dto.ts
+- [x] src/product/dto/category-attribute-filter.dto.ts
+- [x] src/common/entities/abstract.entity.ts
+- [x] src/category/entities/category.entity.ts
+- [x] src/category/dto/update-category.dto.ts
+- [x] src/category/dto/get-category-products.dto.ts
+- [x] src/category/dto/create-category.dto.ts
+- [x] src/category/category.service.ts
+- [x] src/category/category.module.ts
+- [x] src/category/category.controller.ts
+- [ ] src/auth/roles.guard.ts
+- [ ] src/auth/jwt.strategy.ts
+- [ ] src/auth/jwt-auth.guard.ts
+- [ ] src/auth/dto/auth-credentials.dto.ts
+- [x] src/auth/auth.service.ts
+- [ ] src/auth/auth.module.ts
+- [x] src/auth/auth.controller.ts
+- [x] src/app.service.ts
+- [ ] src/app.module.ts
+- [ ] src/app.controller.ts
+- [x] src/user/user.service.ts
 
-- [x] Analysis of current product structure
-- [x] EAV implementation plan created and approved
-- [x] Create EAV core entities (product-attribute, product-attribute-value)
-- [x] Update existing entities to work with EAV
-- [x] Create DTOs for EAV structure
-- [x] Update service layer with EAV logic
-- [x] Update product module with TypeORM configuration
+## Progress
 
-### 📋 Next Steps (Optional)
-
-1. Create database migration for new EAV tables
-2. Test the EAV implementation
-3. Update controllers if needed
-4. Create sample data for testing
-
-## Implementation Summary
-
-### New Entities Created:
-
-- `ProductAttribute` - Defines available product attributes (color, size, material, etc.)
-- `ProductAttributeValue` - Stores actual attribute values for products
-
-### Updated Entities:
-
-- `Product` - Added EAV relationships, removed fixed attributes (weight, dimensions, tags, rating)
-- `ProductVariant` - Added EAV relationships, marked legacy attributes field
-
-### New DTOs:
-
-- `CreateProductAttributeDto` - For creating new attributes
-- `UpdateProductAttributeDto` - For updating attributes
-- `CreateProductAttributeValueDto` - For creating attribute values
-- `UpdateProductAttributeValueDto` - For updating attribute values
-- `CreateProductDto` - Updated to support EAV attributes
-- `UpdateProductDto` - Updated to support EAV attributes
-
-### Service Layer:
-
-- Full EAV implementation with CRUD operations
-- Attribute management methods
-- Proper error handling and validation
-
-### Module Configuration:
-
-- Updated ProductModule with TypeORM configuration for all entities
-
-## Usage Examples:
-
-### Creating a Product with EAV Attributes:
-
-```json
-{
-  "name": "T-Shirt",
-  "slug": "t-shirt",
-  "price": 29.99,
-  "attributes": [
-    {
-      "attributeId": "color-attribute-id",
-      "value": "Red",
-      "metadata": { "unit": "color" }
-    },
-    {
-      "attributeId": "size-attribute-id",
-      "value": "Large",
-      "metadata": { "unit": "size" }
-    }
-  ]
-}
-```
-
-### Creating Attributes:
-
-```json
-{
-  "name": "color",
-  "displayName": "Color",
-  "type": "select",
-  "options": ["Red", "Blue", "Green"],
-  "isRequired": true
-}
-```
+- Started editing files.
