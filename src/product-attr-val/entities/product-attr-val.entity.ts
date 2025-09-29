@@ -1,7 +1,8 @@
-import { Entity, Column, ManyToOne, Index } from 'typeorm';
-import { Product } from './product.entity';
-import { ProductAttribute } from './product-attribute.entity';
+import { Entity, Column, ManyToOne, ManyToMany, Index } from 'typeorm';
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { Product } from 'src/product/entities/product.entity';
+import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
+import { ProductVariant } from 'src/product-attr-var/entities/product-attr-var.entity';
 
 @Entity('product_attribute_values')
 @Index(['product', 'attribute'], { unique: true })
@@ -26,7 +27,10 @@ export class ProductAttributeValue extends AbstractEntity {
   @Index()
   public value: string;
 
-  @Column({ default: true })
-  @Index()
-  public isActive: boolean;
+  //   @Column({ default: true })
+  //   @Index()
+  //   public isActive: boolean;
+
+  @ManyToMany(() => ProductVariant, (variant) => variant.attributeValues)
+  public variants: ProductVariant[];
 }

@@ -11,11 +11,9 @@ import { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
-import {
-  ProductAttribute,
-  AttributeType,
-} from './entities/product-attribute.entity';
-import { ProductAttributeValue } from './entities/product-attribute-value.entity';
+import { ProductIdDto } from './dto/product-id.dto';
+import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
+import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 
 // Type definitions for safe operations
 export interface ValidationRules {
@@ -35,7 +33,6 @@ export interface AttributeData {
   id: string;
   name: string;
   displayName: string;
-  type: AttributeType;
   isRequired: boolean;
   isActive: boolean;
   sortOrder: number;
@@ -49,7 +46,6 @@ export interface CategoryFilterResult {
     id: string;
     name: string;
     displayName: string;
-    type: AttributeType;
     isRequired: boolean;
     isActive: boolean;
     sortOrder: number;
@@ -74,12 +70,11 @@ export class ProductService {
       name: createProductDto.name,
       slug: createProductDto.slug,
       description: createProductDto.description,
-      price: createProductDto.price,
+      // price: createProductDto.price,
       stock: createProductDto.stock,
-      type: createProductDto.type,
       sku: createProductDto.sku,
       barcode: createProductDto.barcode,
-      isActive: createProductDto.isActive,
+      // isActive: createProductDto.isActive,
     });
 
     const savedProduct = await this.productRepository.insert(product);
@@ -141,12 +136,11 @@ export class ProductService {
       name: updateProductDto.name ?? product.name,
       slug: updateProductDto.slug ?? product.slug,
       description: updateProductDto.description ?? product.description,
-      price: updateProductDto.price ?? product.price,
+      // price: updateProductDto.price ?? product.price,
       stock: updateProductDto.stock ?? product.stock,
-      type: updateProductDto.type ?? product.type,
       sku: updateProductDto.sku ?? product.sku,
       barcode: updateProductDto.barcode ?? product.barcode,
-      isActive: updateProductDto.isActive ?? product.isActive,
+      // isActive: updateProductDto.isActive ?? product.isActive,
     });
 
     await this.productRepository.insert(product);
@@ -159,7 +153,8 @@ export class ProductService {
     return this.findOne(id);
   }
 
-  public async remove(id: string): Promise<void> {
+  public async remove(productId: ProductIdDto): Promise<void> {
+    const { id } = productId;
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
   }
@@ -179,7 +174,7 @@ export class ProductService {
       // Only allow attributeId - no auto-creation
       if (attr.attributeId) {
         const existingAttribute = await this.attributeRepository.findOne({
-          where: { id: attr.attributeId, isActive: true },
+          where: { id: attr.attributeId },
         });
 
         if (!existingAttribute) {
@@ -198,7 +193,6 @@ export class ProductService {
         product: { id: productId },
         attr: attribute,
         value: attr.value,
-        isActive: attr.isActive ?? true,
       });
 
       await this.attributeValueRepository.insert(attributeValue);
@@ -214,10 +208,10 @@ export class ProductService {
     }>,
   ): Promise<void> {
     // First, deactivate existing attributes
-    await this.attributeValueRepository.update(
-      { product: { id: productId } },
-      { isActive: false },
-    );
+    // await this.attributeValueRepository.update(
+    //   { product: { id: productId } },
+    //   { isActive: false }
+    // );
 
     // Then create new ones
     await this.createProductAttributes(productId, attributes);
@@ -229,7 +223,6 @@ export class ProductService {
     return this.attributeValueRepository.find({
       where: {
         product: { id: productId },
-        isActive: true,
       },
       relations: ['attribute'],
     });
@@ -384,7 +377,6 @@ export class ProductService {
   public async createAttribute(createAttributeDto: {
     name: string;
     displayName: string;
-    type?: AttributeType;
     description?: string;
     isRequired?: boolean;
     isActive?: boolean;
@@ -433,10 +425,7 @@ export class ProductService {
       return cachedResult;
     }
 
-    const result = await this.attributeRepository.find({
-      where: { isActive: true },
-      order: { sortOrder: 'ASC' },
-    });
+    const result = await this.attributeRepository.find({});
 
     // Cache the result for 15 minutes
     await this.cacheManager.set(cacheKey, result, 900000);
@@ -446,7 +435,7 @@ export class ProductService {
 
   public async getAttributeById(id: string): Promise<ProductAttribute> {
     const attribute = await this.attributeRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
     });
 
     if (!attribute) {

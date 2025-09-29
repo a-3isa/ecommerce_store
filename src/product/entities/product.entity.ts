@@ -1,15 +1,24 @@
-import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  Index,
+  ManyToMany,
+} from 'typeorm';
 // import { ProductGift } from './product-gift.entity';
 import { Category } from 'src/category/entities/category.entity';
-import { ProductAttributeValue } from './product-attribute-value.entity';
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
+import { ProductVariant } from 'src/product-attr-var/entities/product-attr-var.entity';
+import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
 
-export enum ProductType {
-  SINGLE = 'single',
-  VARIANT = 'variant',
-  GROUP = 'group',
-  GIFT = 'gift',
-}
+// export enum ProductType {
+//   SINGLE = 'single',
+//   VARIANT = 'variant',
+//   GROUP = 'group',
+//   GIFT = 'gift',
+// }
 
 @Entity('products')
 @Index(['isActive', 'createdAt'])
@@ -35,12 +44,12 @@ export class Product extends AbstractEntity {
   @Column({ type: 'int', default: 0 })
   public stock: number;
 
-  @Column({
-    type: 'enum',
-    enum: ProductType,
-    default: ProductType.SINGLE,
-  })
-  public type: ProductType;
+  // @Column({
+  //   type: 'enum',
+  //   enum: ProductType,
+  //   default: ProductType.SINGLE,
+  // })
+  // public type: ProductType;
 
   @Column({ length: 100, unique: true, nullable: true })
   public sku: string;
@@ -52,12 +61,17 @@ export class Product extends AbstractEntity {
   @Index()
   public isActive: boolean;
 
-  @ManyToOne(() => Product, (product) => product.children, { nullable: true })
-  public parent: Product;
+  // @ManyToOne(() => Product, (product) => product.children, { nullable: true })
+  // public parent: Product;
 
-  @OneToMany(() => Product, (product) => product.parent)
-  public children: Product[];
+  // @OneToMany(() => Product, (product) => product.parent)
+  // public children: Product[];
 
+  @OneToMany(() => ProductVariant, (variant) => variant.product)
+  public variants: ProductVariant[];
+
+  @ManyToMany(() => ProductAttribute, (attrs) => attrs.products)
+  public attrs: ProductAttribute[];
   // @OneToMany(() => ProductGift, (gift) => gift.product)
   // public gifts: ProductGift[];
 

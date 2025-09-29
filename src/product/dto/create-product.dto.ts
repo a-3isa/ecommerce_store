@@ -2,12 +2,9 @@ import {
   IsString,
   IsOptional,
   IsNumber,
-  IsBoolean,
-  IsEnum,
   IsArray,
   IsObject,
 } from 'class-validator';
-import { ProductType } from '../entities/product.entity';
 import { CreateProductAttributeValueDto } from './product-attribute.dto';
 
 export class CreateProductDto {
@@ -21,16 +18,16 @@ export class CreateProductDto {
   @IsOptional()
   public description?: string;
 
-  @IsNumber()
-  public price: number;
+  @IsString()
+  @IsOptional()
+  public image?: string;
+
+  // @IsNumber()
+  // public price: number;
 
   @IsNumber()
   @IsOptional()
   public stock?: number = 0;
-
-  @IsEnum(ProductType)
-  @IsOptional()
-  public type?: ProductType = ProductType.SINGLE;
 
   @IsString()
   @IsOptional()
@@ -40,9 +37,9 @@ export class CreateProductDto {
   @IsOptional()
   public barcode?: string;
 
-  @IsBoolean()
-  @IsOptional()
-  public isActive?: boolean = true;
+  // @IsBoolean()
+  // @IsOptional()
+  // public isActive?: boolean = true;
 
   @IsString()
   @IsOptional()

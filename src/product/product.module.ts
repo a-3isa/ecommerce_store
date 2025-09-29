@@ -4,9 +4,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { Product } from './entities/product.entity';
+import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
+import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 // import { ProductGift } from './entities/product-gift.entity';
-import { ProductAttribute } from './entities/product-attribute.entity';
-import { ProductAttributeValue } from './entities/product-attribute-value.entity';
 
 @Module({
   imports: [

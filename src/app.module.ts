@@ -9,6 +9,9 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
+import { ProductAttrModule } from './product-attr/product-attr.module';
+import { ProductAttrValModule } from './product-attr-val/product-attr-val.module';
+import { ProductAttrVarModule } from './product-attr-var/product-attr-var.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { ProductModule } from './product/product.module';
     AuthModule,
     CategoryModule,
     ProductModule,
+    ProductAttrModule,
+    ProductAttrValModule,
+    ProductAttrVarModule,
   ],
   controllers: [AppController],
   providers: [
