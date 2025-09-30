@@ -5,7 +5,7 @@ import {
   IsArray,
   IsObject,
 } from 'class-validator';
-import { CreateProductAttributeValueDto } from './product-attribute.dto';
+import { ProductAttributeIdDto } from './product-attribute-id.dto';
 
 export class CreateProductDto {
   @IsString()
@@ -48,5 +48,5 @@ export class CreateProductDto {
   @IsArray()
   @IsObject({ each: true })
   @IsOptional()
-  public attributes?: CreateProductAttributeValueDto[];
+  public attributes?: ProductAttributeIdDto[];
 }

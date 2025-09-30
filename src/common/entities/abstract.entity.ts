@@ -12,7 +12,7 @@ export class AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   @Index()
   public name?: string;
 

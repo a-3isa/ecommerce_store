@@ -164,8 +164,6 @@ export class ProductService {
     productId: string,
     attributes: Array<{
       attributeId: string;
-      value: string;
-      isActive?: boolean;
     }>,
   ): Promise<void> {
     for (const attr of attributes) {
@@ -192,7 +190,6 @@ export class ProductService {
       const attributeValue = this.attributeValueRepository.create({
         product: { id: productId },
         attr: attribute,
-        value: attr.value,
       });
 
       await this.attributeValueRepository.insert(attributeValue);
@@ -203,8 +200,6 @@ export class ProductService {
     productId: string,
     attributes: Array<{
       attributeId: string;
-      value: string;
-      isActive?: boolean;
     }>,
   ): Promise<void> {
     // First, deactivate existing attributes

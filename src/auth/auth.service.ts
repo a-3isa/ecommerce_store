@@ -5,7 +5,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
@@ -59,7 +59,7 @@ export class AuthService {
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
     }
-    throw new UnauthorizedException();
+    throw new NotFoundException(`User not found`);
   }
 
   public async adminRegister(

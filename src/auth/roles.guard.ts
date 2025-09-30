@@ -16,6 +16,7 @@ export class RoleGuard implements CanActivate {
     if (!user) {
       throw new ForbiddenException('No user found');
     }
+    // console.log(user);
 
     if (user.role !== UserRole.ADMIN) {
       throw new ForbiddenException(`Access denied.`);

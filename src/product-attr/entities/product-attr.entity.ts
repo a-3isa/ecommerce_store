@@ -1,5 +1,5 @@
 export class ProductAttr {}
-import { Entity, Column, OneToMany, Index, ManyToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 import { Product } from 'src/product/entities/product.entity';
@@ -14,8 +14,6 @@ import { Product } from 'src/product/entities/product.entity';
 // }
 
 @Entity('product_attributes')
-@Index(['isActive', 'sortOrder'])
-@Index(['type', 'isActive'])
 export class ProductAttribute extends AbstractEntity {
   @Column({ length: 100 })
   public displayName: string; // e.g., "Color", "Size", "Material"
@@ -51,9 +49,8 @@ export class ProductAttribute extends AbstractEntity {
   // @Index()
   // public sortOrder: number;
 
-  @ManyToMany(() => Product, (products) => products.attrs)
-  // @JoinTable()
-  public products: Product[];
+  @ManyToOne(() => Product, (product) => product.attr)
+  public product: Product;
 
   @OneToMany(() => ProductAttributeValue, (value) => value.attr)
   public values: ProductAttributeValue[];

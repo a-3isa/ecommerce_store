@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ProductAttribute } from './entities/product-attr.entity';
 import { CreateProductAttributeDto } from './dto/create-product-attr.dto';
 import { UpdateProductAttrDto } from './dto/update-product-attr.dto';
+import { InsertResult } from 'typeorm/browser';
 
 @Injectable()
 export class ProductAttrService {
@@ -14,9 +15,9 @@ export class ProductAttrService {
 
   async create(
     createProductAttrDto: CreateProductAttributeDto,
-  ): Promise<ProductAttribute> {
+  ): Promise<InsertResult> {
     const productAttr = this.productAttrRepository.create(createProductAttrDto);
-    return this.productAttrRepository.save(productAttr);
+    return this.productAttrRepository.insert(productAttr);
   }
 
   async findAll(): Promise<ProductAttribute[]> {

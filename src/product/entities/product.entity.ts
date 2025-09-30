@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  OneToMany,
-  Index,
-  ManyToMany,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
 // import { ProductGift } from './product-gift.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
@@ -70,8 +63,8 @@ export class Product extends AbstractEntity {
   @OneToMany(() => ProductVariant, (variant) => variant.product)
   public variants: ProductVariant[];
 
-  @ManyToMany(() => ProductAttribute, (attrs) => attrs.products)
-  public attrs: ProductAttribute[];
+  @OneToMany(() => ProductAttribute, (attr) => attr.product)
+  public attr: ProductAttribute[];
   // @OneToMany(() => ProductGift, (gift) => gift.product)
   // public gifts: ProductGift[];
 
