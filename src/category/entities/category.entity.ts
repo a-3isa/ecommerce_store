@@ -1,9 +1,9 @@
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('categories')
-export class Category extends AbstractEntity {
+export class Category extends CommonEntity {
   @Column({ length: 255, unique: true })
   public slug: string;
 

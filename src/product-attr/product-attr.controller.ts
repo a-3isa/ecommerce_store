@@ -31,8 +31,7 @@ export class ProductAttrController {
 
   @Get(':id')
   findOne(@Param() productAttrId: ProductAttrIdDto) {
-    const { id } = productAttrId;
-    return this.productAttrService.findOne(id);
+    return this.productAttrService.findOne(productAttrId);
   }
 
   @Patch(':id')
@@ -40,13 +39,11 @@ export class ProductAttrController {
     @Param() productAttrId: ProductAttrIdDto,
     @Body() updateProductAttrDto: UpdateProductAttrDto,
   ) {
-    const { id } = productAttrId;
-    return this.productAttrService.update(id, updateProductAttrDto);
+    return this.productAttrService.update(productAttrId, updateProductAttrDto);
   }
 
   @Delete(':id')
   remove(@Param() productAttrId: ProductAttrIdDto) {
-    const { id } = productAttrId;
-    return this.productAttrService.remove(id);
+    return this.productAttrService.remove(productAttrId);
   }
 }

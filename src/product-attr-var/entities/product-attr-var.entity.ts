@@ -1,19 +1,17 @@
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 import { Column, Entity, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 
 @Entity('product_variant')
-export class ProductVariant extends AbstractEntity {
+export class ProductVariant extends CommonEntity {
   @Column()
   price: number;
 
   @Column()
   instructions: string;
 
-  @ManyToOne(() => Product, (product) => product.variants, {
-    nullable: true,
-  })
+  @ManyToOne(() => Product, (product) => product.variants)
   public product: Product;
 
   @ManyToMany(() => ProductAttributeValue, (value) => value.variants)

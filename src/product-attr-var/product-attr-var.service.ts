@@ -1,24 +1,42 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, InsertResult, Repository } from 'typeorm';
 import { ProductVariant } from './entities/product-attr-var.entity';
 import { CreateProductAttrVarDto } from './dto/create-product-attr-var.dto';
 import { UpdateProductAttrVarDto } from './dto/update-product-attr-var.dto';
+import { Product } from 'src/product/entities/product.entity';
+import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 
 @Injectable()
 export class ProductAttrVarService {
   constructor(
     @InjectRepository(ProductVariant)
     private productAttrVarRepository: Repository<ProductVariant>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
+    @InjectRepository(ProductAttributeValue)
+    private productAttributeValueRepository: Repository<ProductAttributeValue>,
   ) {}
 
   async create(
     createProductAttrVarDto: CreateProductAttrVarDto,
-  ): Promise<ProductVariant> {
-    const productAttrVar = this.productAttrVarRepository.create(
-      createProductAttrVarDto,
-    );
-    return this.productAttrVarRepository.save(productAttrVar);
+  ): Promise<InsertResult> {
+    const { productId, attributeValueIds, ...rest } = createProductAttrVarDto;
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+    const attributeValues = await this.productAttributeValueRepository.findBy({
+      id: In(attributeValueIds),
+    });
+    const productAttrVar = this.productAttrVarRepository.create({
+      ...rest,
+      product: product,
+      attributeValues: attributeValues,
+    });
+    return await this.productAttrVarRepository.insert(productAttrVar);
   }
 
   async findAll(): Promise<ProductVariant[]> {

@@ -6,45 +6,31 @@ import {
   Patch,
   Param,
   Delete,
-  HttpStatus,
-  HttpCode,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { CacheMedium } from './decorators/cache.decorator';
-import { LogMethod } from './decorators/logging.decorator';
-import { ValidateRequest } from './decorators/validation.decorator';
 import { ProductIdDto } from './dto/product-id.dto';
 
 @Controller('product')
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private productService: ProductService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @LogMethod()
-  @ValidateRequest()
   public create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
 
   @Get()
-  @CacheMedium()
-  @LogMethod()
   public findAll() {
     return this.productService.findAll();
   }
 
   @Get(':id')
-  @CacheMedium()
-  @LogMethod()
-  public async findOne(@Param('id') productId: ProductIdDto) {
+  public async findOne(@Param() productId: ProductIdDto) {
     const { id } = productId;
     const product = await this.productService.findOne(id);
     if (!product) {
@@ -55,9 +41,6 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
-  @LogMethod()
-  @ValidateRequest()
   public async update(
     @Param('id') productId: ProductIdDto,
     @Body() updateProductDto: UpdateProductDto,
@@ -75,8 +58,6 @@ export class ProductController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @LogMethod()
   public async remove(@Param('id') id: ProductIdDto) {
     try {
       await this.productService.remove(id);

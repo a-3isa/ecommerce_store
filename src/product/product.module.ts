@@ -6,6 +6,7 @@ import { ProductController } from './product.controller';
 import { Product } from './entities/product.entity';
 import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
+import { Category } from 'src/category/entities/category.entity';
 // import { ProductGift } from './entities/product-gift.entity';
 
 @Module({
@@ -15,6 +16,7 @@ import { ProductAttributeValue } from 'src/product-attr-val/entities/product-att
       // ProductGift,
       ProductAttribute,
       ProductAttributeValue,
+      Category,
     ]),
     CacheModule.register({
       ttl: 300, // 5 minutes default TTL

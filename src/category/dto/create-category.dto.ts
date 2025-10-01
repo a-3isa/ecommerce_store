@@ -1,17 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsUUID } from 'class-validator';
+import { BaseCreateDto } from 'src/common/dto/common.dto';
 
-export class CreateCategoryDto {
-  @IsString()
-  public name: string;
-
-  @IsString()
-  public slug: string;
-
-  @IsOptional()
-  @IsString()
-  public description?: string;
-
+export class CreateCategoryDto extends BaseCreateDto {
   @IsOptional()
   @IsUUID()
   public parentId?: string;

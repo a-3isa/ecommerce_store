@@ -1,9 +1,9 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { Product } from './product.entity';
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 
 @Entity('gift_rules')
-export class GiftRule extends AbstractEntity {
+export class GiftRule extends CommonEntity {
   // The "main" product you must buy
   @ManyToOne(() => Product, { nullable: false })
   public triggerProduct: Product;

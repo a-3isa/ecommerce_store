@@ -1,6 +1,3 @@
-import { IsString } from 'class-validator';
+import { BaseIdDto } from 'src/common/dto/common.dto';
 
-export class ProductAttrVarIdDto {
-  @IsString()
-  id: string;
-}
+export class ProductAttrVarIdDto extends BaseIdDto {}

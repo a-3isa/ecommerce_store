@@ -28,8 +28,8 @@ export class CategoryController {
   }
 
   @Get('/:id')
-  findSubCategories(@Param('id') parentId: CategoryIdDto) {
-    const { id } = parentId;
+  findSubCategories(@Param() params: CategoryIdDto) {
+    const { id } = params;
     return this.categoryService.findSubCategories(id);
   }
 

@@ -1,52 +1,35 @@
 import {
-  IsString,
   IsOptional,
   IsNumber,
   IsArray,
-  IsObject,
+  IsString,
+  IsUUID,
 } from 'class-validator';
-import { ProductAttributeIdDto } from './product-attribute-id.dto';
+import { BaseCreateDto } from 'src/common/dto/common.dto';
 
-export class CreateProductDto {
-  @IsString()
-  public name: string;
-
-  @IsString()
-  public slug: string;
-
-  @IsString()
-  @IsOptional()
-  public description?: string;
-
+export class CreateProductDto extends BaseCreateDto {
   @IsString()
   @IsOptional()
   public image?: string;
-
-  // @IsNumber()
-  // public price: number;
 
   @IsNumber()
   @IsOptional()
   public stock?: number = 0;
 
   @IsString()
-  @IsOptional()
-  public sku?: string;
+  public sku: string;
 
   @IsString()
-  @IsOptional()
-  public barcode?: string;
+  public barcode: string;
 
-  // @IsBoolean()
-  // @IsOptional()
-  // public isActive?: boolean = true;
-
-  @IsString()
-  @IsOptional()
-  public categoryId?: string;
+  @IsUUID()
+  public categoryId: string;
 
   @IsArray()
-  @IsObject({ each: true })
-  @IsOptional()
-  public attributes?: ProductAttributeIdDto[];
+  @IsUUID('4', { each: true }) // ✅ validates each item is a UUID v4
+  public attributesId: string[];
+
+  @IsArray()
+  @IsUUID('4', { each: true }) // ✅ validates each item is a UUID v4
+  public attributesValId: string[];
 }

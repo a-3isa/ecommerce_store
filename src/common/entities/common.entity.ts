@@ -7,8 +7,8 @@ import {
   Index,
 } from 'typeorm';
 
-@Entity('abstract_entity')
-export class AbstractEntity {
+@Entity('common_entity')
+export class CommonEntity {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 

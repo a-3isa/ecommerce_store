@@ -1,16 +1,13 @@
 import { Entity, Column, ManyToOne, ManyToMany, Index } from 'typeorm';
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
 import { ProductVariant } from 'src/product-attr-var/entities/product-attr-var.entity';
 
 @Entity('product_attribute_values')
-export class ProductAttributeValue extends AbstractEntity {
-  @ManyToOne(() => Product, (product) => product.attrValues, {
-    onDelete: 'CASCADE',
-  })
-  @Index()
-  public product: Product;
+export class ProductAttributeValue extends CommonEntity {
+  @ManyToMany(() => Product, (product) => product.attrValues)
+  public products: Product[];
 
   @ManyToOne(() => ProductAttribute, (attribute) => attribute.values, {
     onDelete: 'CASCADE',

@@ -8,5 +8,6 @@ import { ProductAttribute } from './entities/product-attr.entity';
   imports: [TypeOrmModule.forFeature([ProductAttribute])],
   controllers: [ProductAttrController],
   providers: [ProductAttrService],
+  exports: [ProductAttrService, TypeOrmModule],
 })
 export class ProductAttrModule {}
