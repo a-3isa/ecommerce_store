@@ -12,6 +12,8 @@ import { ProductModule } from './product/product.module';
 import { ProductAttrModule } from './product-attr/product-attr.module';
 import { ProductAttrValModule } from './product-attr-val/product-attr-val.module';
 import { ProductAttrVarModule } from './product-attr-var/product-attr-var.module';
+import { GiftModule } from './gift/gift.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { ProductAttrVarModule } from './product-attr-var/product-attr-var.module
     ProductAttrModule,
     ProductAttrValModule,
     ProductAttrVarModule,
+    GiftModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

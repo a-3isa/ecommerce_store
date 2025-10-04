@@ -71,14 +71,28 @@ export class ProductService {
 
   public async findAll(): Promise<Product[]> {
     return this.productRepository.find({
-      relations: ['attrValues', 'attr', 'category', 'variants'],
+      relations: [
+        'attrValues',
+        'attr',
+        'category',
+        'variants',
+        'triggerGift',
+        'giftProduct',
+      ],
     });
   }
 
   public async findOne(id: string): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['attrValues', 'attr', 'category', 'variants'],
+      relations: [
+        'attrValues',
+        'attr',
+        'category',
+        'variants',
+        'triggerGift',
+        'giftProduct',
+      ],
     });
 
     if (!product) {

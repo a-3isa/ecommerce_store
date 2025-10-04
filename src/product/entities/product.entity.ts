@@ -13,13 +13,7 @@ import { CommonEntity } from 'src/common/entities/common.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 import { ProductVariant } from 'src/product-attr-var/entities/product-attr-var.entity';
 import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
-
-// export enum ProductType {
-//   SINGLE = 'single',
-//   VARIANT = 'variant',
-//   GROUP = 'group',
-//   GIFT = 'gift',
-// }
+import { Gift } from 'src/gift/entities/gift.entity';
 
 @Entity('products')
 @Index(['isActive', 'createdAt'])
@@ -70,4 +64,10 @@ export class Product extends CommonEntity {
   @ManyToOne(() => Category, (category) => category.products)
   @Index()
   public category: Category;
+
+  @OneToMany(() => Gift, (gift) => gift.triggerProduct)
+  public triggerGift: Gift;
+
+  @ManyToMany(() => Gift, (gift) => gift.giftProduct)
+  public giftProduct: Gift;
 }
