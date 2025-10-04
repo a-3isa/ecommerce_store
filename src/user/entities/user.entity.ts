@@ -1,5 +1,5 @@
 import { Cart } from 'src/cart/entities/cart.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -30,6 +30,6 @@ export class User {
   @Column({ type: 'text', nullable: true })
   public address: string;
 
-  @OneToMany(() => Cart, (cart) => cart.user)
+  @OneToOne(() => Cart, (cart) => cart.user)
   public cart: Cart;
 }

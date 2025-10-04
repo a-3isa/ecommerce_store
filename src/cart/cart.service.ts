@@ -22,35 +22,48 @@ export class CartService {
   ) {}
 
   async create(createCartDto: CreateCartDto, userId: string): Promise<Cart> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['cart'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    const productIds = createCartDto.items.map((item) => item.productId);
-    const products = await this.productRepository.findBy({
-      id: In(productIds),
-    });
-
-    if (products.length !== productIds.length) {
-      throw new NotFoundException('Some products not found');
+    let cart = user.cart;
+    if (!cart) {
+      cart = this.cartRepository.create({ user });
+      await this.cartRepository.save(cart);
     }
 
-    const cart = this.cartRepository.create({ user, items: [] });
-    await this.cartRepository.save(cart);
+    // Remove existing items
+    await this.cartItemRepository.delete({ cart: { id: cart.id } });
 
-    const cartItems = createCartDto.items.map((item) => {
-      const product = products.find((p) => p.id === item.productId);
-      return this.cartItemRepository.create({
-        cart,
-        product,
-        quantity: item.quantity,
+    if (createCartDto.items && createCartDto.items.length > 0) {
+      const productIds = createCartDto.items.map((item) => item.productId);
+      const products = await this.productRepository.findBy({
+        id: In(productIds),
       });
-    });
 
-    await this.cartItemRepository.save(cartItems);
+      if (products.length !== productIds.length) {
+        throw new NotFoundException('Some products not found');
+      }
 
-    cart.items = cartItems;
+      const cartItems = createCartDto.items.map((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        return this.cartItemRepository.create({
+          cart,
+          product,
+          quantity: item.quantity,
+        });
+      });
+
+      await this.cartItemRepository.save(cartItems);
+      cart.items = cartItems;
+    } else {
+      cart.items = [];
+    }
+
     return cart;
   }
 
@@ -109,12 +122,17 @@ export class CartService {
   }
 
   async getCartByUser(userId: string): Promise<Cart> {
-    const cart = await this.cartRepository.findOne({
+    let cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
       relations: ['items', 'items.product'],
     });
     if (!cart) {
-      throw new NotFoundException(`Cart for user ID ${userId} not found`);
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      cart = this.cartRepository.create({ user, items: [] });
+      await this.cartRepository.save(cart);
     }
     return cart;
   }

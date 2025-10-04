@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { User } from 'src/user/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ConfigService } from '@nestjs/config';
       }),
     }),
     TypeOrmModule.forFeature([User]),
+    CartModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

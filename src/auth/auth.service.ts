@@ -14,12 +14,14 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { User, UserRole } from 'src/user/entities/user.entity';
+import { CartService } from 'src/cart/cart.service';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private cartService: CartService,
   ) {}
 
   public async register(
@@ -35,7 +37,9 @@ export class AuthService {
       password: hashedPassword,
     });
     try {
-      await this.userRepository.insert(user);
+      const savedUser = await this.userRepository.save(user);
+      // Create cart for new user
+      await this.cartService.getCartByUser(savedUser.id);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
@@ -77,7 +81,9 @@ export class AuthService {
     });
     console.log(user);
     try {
-      await this.userRepository.insert(user);
+      const savedUser = await this.userRepository.save(user);
+      // Create cart for new user
+      await this.cartService.getCartByUser(savedUser.id);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
