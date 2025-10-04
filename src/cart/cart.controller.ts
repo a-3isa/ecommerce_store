@@ -6,22 +6,25 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { AddToCartDto } from './dto/add-to-cart.dto';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/user/entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('cart')
+@UseGuards(JwtAuthGuard)
 // @UseGuards(JwtAuthGuard)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto, @GetUser() user: User) {
-    return this.cartService.create(createCartDto, user.id);
-  }
+  // @Post()
+  // create(@Body() createCartDto: CreateCartDto, @GetUser() user: User) {
+  //   return this.cartService.create(createCartDto, user.id);
+  // }
 
   @Get()
   findAll() {
@@ -30,7 +33,12 @@ export class CartController {
 
   @Get('me')
   getMyCart(@GetUser() user: User) {
-    return this.cartService.getCartByUser(user.id);
+    return this.cartService.getCartByUser(user);
+  }
+
+  @Post('add')
+  addToCart(@GetUser() user: User, @Body() addToCartDto: AddToCartDto) {
+    return this.cartService.addToCart(user, addToCartDto);
   }
 
   @Get(':id')

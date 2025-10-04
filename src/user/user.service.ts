@@ -1,26 +1,71 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { compare, hash, genSalt } from 'bcrypt';
+
+import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  public create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  public async findAll(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  public findAll() {
-    return `This action returns all user`;
+  public async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
-  public findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public async update(user: User, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      if (!updateUserDto.oldPassword) {
+        throw new BadRequestException(
+          'Old password is required to set a new password',
+        );
+      }
+      if (!(await compare(updateUserDto.oldPassword, user.password))) {
+        throw new ConflictException('Old password does not match');
+      }
+      if (await compare(updateUserDto.password, user.password)) {
+        throw new ConflictException(
+          'New password cannot be the same as the current password',
+        );
+      }
+      const salt = await genSalt();
+      updateUserDto.password = await hash(updateUserDto.password, salt);
+    }
+    await this.userRepository.update(user.id, updateUserDto);
+    return this.findOne(user.id);
   }
 
-  public update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  public async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
   }
 
-  public remove(id: number) {
-    return `This action removes a #${id} user`;
+  public async getMe(userId: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['cart', 'cart.items', 'cart.items.product'],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

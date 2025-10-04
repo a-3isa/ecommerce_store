@@ -5,3 +5,4 @@
 - [x] Implement CartService methods: create, findAll, findOne, update, remove, and additional methods like addItem, updateItemQuantity, removeItem, getCartByUser
 - [x] Update CartController to handle cart operations, possibly add endpoints for adding/removing items
 - [x] Update CartModule to include CartItem entity in TypeORM
+- [x] Thorough testing completed: server startup, admin login, product creation, user registration, cart operations (add items, quantity updates), authentication guards, validation

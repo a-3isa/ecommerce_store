@@ -14,14 +14,15 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { User, UserRole } from 'src/user/entities/user.entity';
-import { CartService } from 'src/cart/cart.service';
+import { Cart } from 'src/cart/entities/cart.entity';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Cart)
+    private cartRepository: Repository<Cart>,
     private jwtService: JwtService,
-    private cartService: CartService,
   ) {}
 
   public async register(
@@ -37,9 +38,10 @@ export class AuthService {
       password: hashedPassword,
     });
     try {
-      const savedUser = await this.userRepository.save(user);
+      await this.userRepository.insert(user);
       // Create cart for new user
-      await this.cartService.getCartByUser(savedUser.id);
+      const cart = this.cartRepository.create({ user: user });
+      await this.cartRepository.insert(cart);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
@@ -83,7 +85,8 @@ export class AuthService {
     try {
       const savedUser = await this.userRepository.save(user);
       // Create cart for new user
-      await this.cartService.getCartByUser(savedUser.id);
+      const cart = this.cartRepository.create({ user: savedUser });
+      await this.cartRepository.save(cart);
       const payload: JwtPayload = { email };
       const accessToken: string = this.jwtService.sign(payload);
       return { accessToken };
