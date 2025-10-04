@@ -1,8 +1,1 @@
-- [x] Create CartItem entity with relations to Cart and Product, including quantity field
-- [x] Update Cart entity to include ManyToOne relation to User and OneToMany to CartItem
-- [x] Update CreateCartDto to include product ids and quantities
-- [x] Update UpdateCartDto to include product ids and quantities
-- [x] Implement CartService methods: create, findAll, findOne, update, remove, and additional methods like addItem, updateItemQuantity, removeItem, getCartByUser
-- [x] Update CartController to handle cart operations, possibly add endpoints for adding/removing items
-- [x] Update CartModule to include CartItem entity in TypeORM
-- [x] Thorough testing completed: server startup, admin login, product creation, user registration, cart operations (add items, quantity updates), authentication guards, validation
+- [x] Fix unsafe member access in GetUser decorator by casting req.user as User and removing ESLint disables.
