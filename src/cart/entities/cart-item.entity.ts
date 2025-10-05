@@ -15,4 +15,7 @@ export class CartItem {
 
   @Column({ type: 'int', default: 1 })
   public quantity: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  public price: number;
 }

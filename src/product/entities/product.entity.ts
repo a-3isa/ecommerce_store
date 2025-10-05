@@ -34,6 +34,9 @@ export class Product extends CommonEntity {
   @Column({ type: 'int', default: 0 })
   public stock: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  public price: number;
+
   @Column({ length: 100, unique: true, nullable: true })
   public sku: string;
 
