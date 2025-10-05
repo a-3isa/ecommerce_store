@@ -23,7 +23,7 @@ export class CartController {
     @GetUser() user: User, // ← your custom decorator for current user
     @Body() dto: UpdateCartDto,
   ) {
-    return this.cartService.updateCart(user.id, dto);
+    return this.cartService.updateCart(user, dto);
   }
 
   @Get(':id')
