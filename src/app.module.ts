@@ -14,6 +14,7 @@ import { ProductAttrValModule } from './product-attr-val/product-attr-val.module
 import { ProductAttrVarModule } from './product-attr-var/product-attr-var.module';
 import { GiftModule } from './gift/gift.module';
 import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CartModule } from './cart/cart.module';
     ProductAttrVarModule,
     GiftModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
