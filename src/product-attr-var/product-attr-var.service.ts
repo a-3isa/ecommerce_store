@@ -20,7 +20,7 @@ export class ProductAttrVarService {
 
   async create(
     createProductAttrVarDto: CreateProductAttrVarDto,
-  ): Promise<InsertResult> {
+  ): Promise<ProductVariant> {
     const { productId, attributeValueIds, ...rest } = createProductAttrVarDto;
     const product = await this.productRepository.findOne({
       where: { id: productId },
@@ -36,7 +36,7 @@ export class ProductAttrVarService {
       product: product,
       attributeValues: attributeValues,
     });
-    return await this.productAttrVarRepository.insert(productAttrVar);
+    return await this.productAttrVarRepository.save(productAttrVar);
   }
 
   async findAll(): Promise<ProductVariant[]> {

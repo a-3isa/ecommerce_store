@@ -16,11 +16,8 @@ import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity'
 import { Gift } from 'src/gift/entities/gift.entity';
 
 @Entity('products')
-@Index(['isActive', 'createdAt'])
-@Index(['isActive', 'name'])
-@Index(['category', 'isActive'])
-@Index(['sku'], { unique: true, where: 'sku IS NOT NULL' })
-@Index(['barcode'], { unique: true, where: 'barcode IS NOT NULL' })
+@Index(['sku'], { unique: true })
+@Index(['barcode'], { unique: true })
 export class Product extends CommonEntity {
   @Column({ length: 255, unique: true })
   public slug: string;
@@ -31,8 +28,8 @@ export class Product extends CommonEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   public image: string;
 
-  @Column({ type: 'int', default: 0 })
-  public stock: number;
+  // @Column({ type: 'int', default: 0 })
+  // public stock: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   public price: number;
@@ -43,9 +40,9 @@ export class Product extends CommonEntity {
   @Column({ length: 100, unique: true, nullable: true })
   public barcode: string;
 
-  @Column({ default: true })
-  @Index()
-  public isActive: boolean;
+  // @Column({ default: true })
+  // @Index()
+  // public isActive: boolean;
 
   @OneToMany(() => ProductVariant, (variant) => variant.product, {
     eager: true,

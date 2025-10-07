@@ -8,19 +8,20 @@ import { Repository, DataSource } from 'typeorm';
 import { Cart } from './entities/cart.entity';
 import { CartItem } from './entities/cart-item.entity';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { Product } from 'src/product/entities/product.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ProductVariant } from 'src/product-attr-var/entities/product-attr-var.entity';
 
 @Injectable()
 export class CartService {
   constructor(
     @InjectRepository(Cart)
     private cartRepository: Repository<Cart>,
-    @InjectRepository(CartItem)
-    private cartItemRepository: Repository<CartItem>,
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
     private dataSource: DataSource,
+    // @InjectRepository(CartItem)
+    // @InjectRepository(ProductVariant)
+    // private cartItemRepository: Repository<CartItem>,
+    // @InjectRepository(Product)
+    // private productRepository: Repository<Product>,
   ) {}
 
   async getCartByUser(user: User): Promise<Cart> {
@@ -38,66 +39,89 @@ export class CartService {
 
   async updateCart(user: User, dto: UpdateCartDto) {
     const queryRunner = this.dataSource.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      const { productId, quantity } = dto;
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const { productVarId, quantity } = dto;
 
       const cartRepo = queryRunner.manager.getRepository(Cart);
       const cartItemRepo = queryRunner.manager.getRepository(CartItem);
-      const productRepo = queryRunner.manager.getRepository(Product);
+      const productAttrVarRepo =
+        queryRunner.manager.getRepository(ProductVariant);
 
       // Step 2: Fetch or create cart
-      const cart = await cartRepo.findOne({
+      let cart = await cartRepo.findOne({
         where: { user },
-        relations: ['items', 'items.product'],
+        relations: ['items', 'items.productVariant'],
       });
-      if (!cart) throw new NotFoundException('Cart not found');
-
-      // Step 3: Fetch product
-      const product = await productRepo.findOne({ where: { id: productId } });
-      if (!product || !product.isActive)
+      if (!cart) {
+        cart = cartRepo.create({
+          user,
+          total: 0,
+        });
+        await cartRepo.save(cart);
+      }
+      // console.log(cart);
+      // Step 3: Fetch px roduct variant
+      const productVariant = await productAttrVarRepo.findOne({
+        where: { id: productVarId },
+      });
+      if (!productVariant) {
         throw new NotFoundException('Product not found or inactive');
+      }
 
-      if (product.stock < quantity)
+      // Check stock availability (do not subtract from stock here; only check)
+      if (productVariant.stock < quantity) {
         throw new BadRequestException('Insufficient stock');
+      }
 
-      // Step 4: Find cart item
+      // Step 4: Find existing cart item
       let cartItem = await cartItemRepo.findOne({
-        where: { cart, product },
-        relations: ['product'],
+        where: {
+          // cart: cart,
+          productVariant: { id: productVariant.id },
+        },
       });
 
-      if (quantity == 0 && cartItem) {
+      // console.log(cartItem);
+
+      if (quantity === 0 && cartItem) {
         await cartItemRepo.remove(cartItem);
         cartItem = null;
-      } else {
-        product.stock -= quantity;
-        await productRepo.save(product);
-
+      } else if (quantity > 0) {
         if (cartItem) {
+          // console.log(cartItem.quantity);
           cartItem.quantity = quantity;
+          // console.log(cartItem.quantity);
         } else {
           cartItem = cartItemRepo.create({
-            cart,
-            product,
-            quantity,
+            quantity: quantity,
+            cart: { id: cart.id },
+            productVariant: { id: productVariant.id },
           });
+          // console.log(cartItem);
         }
+      } else {
+        // Invalid quantity (e.g., negative); throw error or handle as per validation
+        throw new BadRequestException(
+          'Quantity must be a positive number or zero',
+        );
       }
 
       // Step 6: Save updated item (if still exists)
       if (cartItem) {
-        cartItem.price = cartItem.quantity * product.price;
+        cartItem.price = cartItem.quantity * productVariant.price;
+        // console.log(cartItem);
         await cartItemRepo.save(cartItem);
       }
 
       // Step 7: Recalculate total
       const items = await cartItemRepo.find({
-        where: { cart },
+        where: { cart: { id: cart.id } },
       });
+      // console.log(items);
+      cart.items = items;
       cart.total = items.reduce((sum, item) => sum + Number(item.price), 0);
       await cartRepo.save(cart);
 
@@ -105,10 +129,6 @@ export class CartService {
       await queryRunner.commitTransaction();
 
       // Return updated cart
-      return cartRepo.findOne({
-        where: { id: cart.id },
-        relations: ['items', 'items.product'],
-      });
     } catch (error) {
       // ❌ Rollback all changes if any step fails
       await queryRunner.rollbackTransaction();
@@ -117,6 +137,10 @@ export class CartService {
       // Always release the connection
       await queryRunner.release();
     }
+    return this.cartRepository.findOne({
+      where: { user },
+      relations: ['items', 'items.productVariant'],
+    });
   }
 
   async findOne(id: string): Promise<Cart> {

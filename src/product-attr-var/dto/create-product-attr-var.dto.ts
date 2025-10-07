@@ -1,4 +1,10 @@
-import { IsNumber, IsString, IsUUID, IsArray } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsUUID,
+  IsArray,
+  IsPositive,
+} from 'class-validator';
 
 export class CreateProductAttrVarDto {
   @IsNumber()
@@ -9,6 +15,9 @@ export class CreateProductAttrVarDto {
 
   @IsUUID()
   public productId: string;
+
+  @IsPositive()
+  public stock: number;
 
   @IsArray()
   @IsUUID('4', { each: true })

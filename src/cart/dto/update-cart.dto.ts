@@ -1,8 +1,8 @@
-import { IsUUID, IsInt, Min, IsOptional, IsIn } from 'class-validator';
+import { IsUUID, IsInt, Min } from 'class-validator';
 
 export class UpdateCartDto {
   @IsUUID()
-  productId: string;
+  productVarId: string;
 
   // quantity can be positive (add/update) or zero (remove)
   @IsInt()
@@ -10,7 +10,7 @@ export class UpdateCartDto {
   quantity: number;
 
   // optional action, can override behavior if needed
-  @IsOptional()
-  @IsIn(['add', 'remove'])
-  action?: 'add' | 'remove';
+  // @IsOptional()
+  // @IsIn(['add', 'remove'])
+  // action?: 'add' | 'remove';
 }

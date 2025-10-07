@@ -49,7 +49,14 @@ export class UserService {
       const salt = await genSalt();
       updateUserDto.password = await hash(updateUserDto.password, salt);
     }
-    await this.userRepository.update(user.id, updateUserDto);
+    const updateData: any = { ...updateUserDto };
+    if (updateData.address) {
+      updateData.address = [updateData.address];
+    }
+    if (updateData.billingInfo) {
+      updateData.billingInfo = [updateData.billingInfo];
+    }
+    await this.userRepository.update(user.id, updateData);
     return this.findOne(user.id);
   }
 
@@ -61,7 +68,7 @@ export class UserService {
   public async getMe(userId: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['cart', 'cart.items', 'cart.items.product'],
+      relations: ['cart', 'cart.items', 'cart.items.productVariant'],
     });
     if (!user) {
       throw new NotFoundException('User not found');

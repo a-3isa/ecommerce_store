@@ -9,12 +9,12 @@ export class Cart extends CommonEntity {
   @JoinColumn()
   public user: User;
 
-  @OneToMany(() => CartItem, (item) => item.cart, {
-    eager: true,
-    cascade: true,
-  })
+  @OneToMany(() => CartItem, (item) => item.cart)
   public items: CartItem[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   public total: number;
+
+  // @OneToMany(() => Order, (order) => order.cart)
+  // order: Order;
 }
