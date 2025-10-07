@@ -1,9 +1,5 @@
-- [x] Fix QueryRunnerAlreadyReleasedError in cart.service.ts by changing return to use this.cartRepository.findOne
-- [x] Fix duplicate key error by changing CartItem-ProductVariant relationship from OneToOne to ManyToOne
-- [x] Fix cart item finding to use ids in where clause to ensure existing items are updated correctly
-- [x] Fix cartItem creation to explicitly set cart and productVariant properties to ensure foreign keys are set correctly
-- [x] Fix order service save hanging by loading product relation and assigning correct product entity
-- [x] Fix order save hanging by changing Order-User relation from OneToOne to ManyToOne
-- [x] Fix cart save hanging by using the transactional repository for saving the cleared cart
-- [x] Fix order return hanging by using the main repository for finding the created order after transaction commit
-- [x] Add check for product existence in order items to prevent saving with undefined product
+- [x] Update OrderStatus enum: change CONFIRMED to PAID
+- [x] Update order.service.ts: change webhook to set status to PAID
+- [x] Uncomment update method in order.service.ts and add transition validation
+- [x] Uncomment update endpoint in order.controller.ts
+- [x] Test the workflow transitions

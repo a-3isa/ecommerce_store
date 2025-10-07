@@ -1,11 +1,11 @@
-import { Entity, OneToMany, ManyToOne, JoinColumn, Column } from 'typeorm';
+import { Entity, OneToMany, ManyToOne, Column } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
-  CONFIRMED = 'confirmed',
+  PAID = 'paid',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
@@ -13,8 +13,7 @@ export enum OrderStatus {
 
 @Entity('orders')
 export class Order extends CommonEntity {
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   public user: User;
 
   @OneToMany(() => OrderItem, (item) => item.order, {

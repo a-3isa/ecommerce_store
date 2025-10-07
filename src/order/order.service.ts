@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
@@ -9,6 +13,7 @@ import { User } from 'src/user/entities/user.entity';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -219,7 +224,7 @@ export class OrderService {
 
       const order = await this.initiateOrder(cartId, user);
       console.log('haaaaaaaaaaaaaaaow');
-      order.status = OrderStatus.CONFIRMED;
+      order.status = OrderStatus.PAID;
       await this.orderRepository.save(order);
       console.log('meaaaaaaaaaaaaaaaw');
     }
@@ -227,45 +232,68 @@ export class OrderService {
     return { received: true };
   }
 
-  // async findAll(user: User): Promise<Order[]> {
-  //   return this.orderRepository.find({
-  //     where: { user },
-  //     relations: ['user', 'items', 'items.product'],
-  //     order: { createdAt: 'DESC' },
-  //   });
-  // }
+  async findAll(user: User): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: { user },
+      relations: ['user', 'items', 'items.product'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 
-  // async findOne(id: string, user?: User): Promise<Order> {
-  //   const where: any = { id };
-  //   if (user) where.user = user;
+  async findOne(id: string, user?: User): Promise<Order> {
+    const where: any = { id };
+    if (user) where.user = user;
 
-  //   const order = await this.orderRepository.findOne({
-  //     where,
-  //     relations: ['user', 'items', 'items.product'],
-  //   });
+    const order = await this.orderRepository.findOne({
+      where,
+      relations: ['user', 'items', 'items.product'],
+    });
 
-  //   if (!order) {
-  //     throw new NotFoundException(`Order with ID ${id} not found`);
-  //   }
+    if (!order) {
+      throw new BadRequestException(`Order with ID ${id} not found`);
+    }
 
-  //   return order;
-  // }
+    return order;
+  }
 
-  // async update(
-  //   id: string,
-  //   updateOrderDto: UpdateOrderDto,
-  //   user?: User,
-  // ): Promise<Order> {
-  //   const order = await this.findOne(id, user);
+  async update(
+    id: string,
+    updateOrderDto: UpdateOrderDto,
+    user?: User,
+  ): Promise<Order> {
+    const order = await this.findOne(id, user);
 
-  //   Object.assign(order, updateOrderDto);
-  //   await this.orderRepository.save(order);
+    if (updateOrderDto.status) {
+      this.validateStatusTransition(order.status, updateOrderDto.status);
+    }
 
-  //   return this.findOne(id, user);
-  // }
+    Object.assign(order, updateOrderDto);
+    await this.orderRepository.save(order);
 
-  // async remove(id: string, user?: User): Promise<void> {
-  //   const order = await this.findOne(id, user);
-  //   await this.orderRepository.remove(order);
-  // }
+    return this.findOne(id, user);
+  }
+
+  private validateStatusTransition(
+    currentStatus: OrderStatus,
+    newStatus: OrderStatus,
+  ): void {
+    const validTransitions: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.PAID],
+      [OrderStatus.PAID]: [OrderStatus.SHIPPED],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+
+    if (!validTransitions[currentStatus].includes(newStatus)) {
+      throw new BadRequestException(
+        `Invalid status transition from ${currentStatus} to ${newStatus}`,
+      );
+    }
+  }
+
+  async remove(id: string, user?: User): Promise<void> {
+    const order = await this.findOne(id, user);
+    await this.orderRepository.remove(order);
+  }
 }

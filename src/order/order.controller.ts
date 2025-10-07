@@ -1,9 +1,21 @@
-import { Controller, Post, Body, Headers, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  Req,
+  Res,
+  Get,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { Request, Response } from 'express';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Controller('order')
 export class OrderController {
@@ -33,27 +45,27 @@ export class OrderController {
     }
   }
 
-  // @Get()
-  // findAll(@GetUser() user: User) {
-  //   return this.orderService.findAll(user);
-  // }
+  @Get()
+  findAll(@GetUser() user: User) {
+    return this.orderService.findAll(user);
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string, @GetUser() user: User) {
-  //   return this.orderService.findOne(id, user);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string, @GetUser() user: User) {
+    return this.orderService.findOne(id, user);
+  }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateOrderDto: UpdateOrderDto,
-  //   @GetUser() user: User,
-  // ) {
-  //   return this.orderService.update(id, updateOrderDto, user);
-  // }
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+    @GetUser() user: User,
+  ) {
+    return this.orderService.update(id, updateOrderDto, user);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string, @GetUser() user: User) {
-  //   return this.orderService.remove(id, user);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string, @GetUser() user: User) {
+    return this.orderService.remove(id, user);
+  }
 }

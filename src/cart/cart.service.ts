@@ -17,17 +17,11 @@ export class CartService {
     @InjectRepository(Cart)
     private cartRepository: Repository<Cart>,
     private dataSource: DataSource,
-    // @InjectRepository(CartItem)
-    // @InjectRepository(ProductVariant)
-    // private cartItemRepository: Repository<CartItem>,
-    // @InjectRepository(Product)
-    // private productRepository: Repository<Product>,
   ) {}
 
   async getCartByUser(user: User): Promise<Cart> {
     const cart = await this.cartRepository.findOne({
       where: { user },
-      relations: ['user', 'items', 'items.product'],
     });
 
     if (!cart) {
@@ -51,19 +45,10 @@ export class CartService {
         queryRunner.manager.getRepository(ProductVariant);
 
       // Step 2: Fetch or create cart
-      let cart = await cartRepo.findOne({
-        where: { user },
+      const cart = await cartRepo.findOneOrFail({
+        where: { user: { id: user.id } },
         relations: ['items', 'items.productVariant'],
       });
-      if (!cart) {
-        cart = cartRepo.create({
-          user,
-          total: 0,
-        });
-        await cartRepo.save(cart);
-      }
-      // console.log(cart);
-      // Step 3: Fetch px roduct variant
       const productVariant = await productAttrVarRepo.findOne({
         where: { id: productVarId },
       });
@@ -84,14 +69,11 @@ export class CartService {
         },
       });
 
-      // console.log(cartItem);
-
       if (quantity === 0 && cartItem) {
         await cartItemRepo.remove(cartItem);
         cartItem = null;
       } else if (quantity > 0) {
         if (cartItem) {
-          // console.log(cartItem.quantity);
           cartItem.quantity = quantity;
           // console.log(cartItem.quantity);
         } else {
@@ -100,7 +82,7 @@ export class CartService {
             cart: { id: cart.id },
             productVariant: { id: productVariant.id },
           });
-          // console.log(cartItem);
+          cartItem.price = cartItem.quantity * productVariant.price;
         }
       } else {
         // Invalid quantity (e.g., negative); throw error or handle as per validation
@@ -120,7 +102,6 @@ export class CartService {
       const items = await cartItemRepo.find({
         where: { cart: { id: cart.id } },
       });
-      // console.log(items);
       cart.items = items;
       cart.total = items.reduce((sum, item) => sum + Number(item.price), 0);
       await cartRepo.save(cart);
@@ -138,19 +119,8 @@ export class CartService {
       await queryRunner.release();
     }
     return this.cartRepository.findOne({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: ['items', 'items.productVariant'],
     });
-  }
-
-  async findOne(id: string): Promise<Cart> {
-    const cart = await this.cartRepository.findOne({
-      where: { id },
-      relations: ['user', 'items', 'items.product'],
-    });
-    if (!cart) {
-      throw new NotFoundException(`Cart with ID ${id} not found`);
-    }
-    return cart;
   }
 }

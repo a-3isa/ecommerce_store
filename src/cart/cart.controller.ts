@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Body, Patch } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/user/entities/user.entity';
@@ -13,31 +13,13 @@ export class CartController {
     return this.cartService.getCartByUser(user);
   }
 
-  // @Post('add')
-  // addToCart(@GetUser() user: User, @Body() addToCartDto: AddToCartDto) {
-  //   return this.cartService.addToCart(user, addToCartDto);
-  // }
-
   @Patch()
-  updateCart(
-    @GetUser() user: User, // ← your custom decorator for current user
-    @Body() dto: UpdateCartDto,
-  ) {
+  updateCart(@GetUser() user: User, @Body() dto: UpdateCartDto) {
     return this.cartService.updateCart(user, dto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(id);
-  }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-  //   return this.cartService.update(id, updateCartDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.cartService.remove(id);
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.cartService.findOne(id);
   // }
 }

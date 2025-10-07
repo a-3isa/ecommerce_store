@@ -6,6 +6,7 @@ import {
   Column,
   OneToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 export enum UserRole {
@@ -40,9 +41,10 @@ export class User {
   @Column({ type: 'text', nullable: true })
   public billingInfo: string[];
 
-  @OneToOne(() => Cart, (cart) => cart.user)
+  @OneToOne(() => Cart, (cart) => cart.user, { eager: true })
+  @JoinColumn()
   public cart: Cart;
 
-  @OneToMany(() => Order, (order) => order.user)
+  @OneToMany(() => Order, (order) => order.user, { eager: true })
   public orders: Order[];
 }

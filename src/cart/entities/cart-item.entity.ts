@@ -9,7 +9,6 @@ export class CartItem {
 
   @ManyToOne(() => Cart, (cart) => cart.items, {
     onDelete: 'CASCADE',
-    eager: true,
   })
   public cart: Cart;
 
@@ -17,6 +16,7 @@ export class CartItem {
     () => ProductVariant,
     (productVariant) => productVariant.cartItems,
     {
+      onDelete: 'CASCADE',
       eager: true,
     },
   )

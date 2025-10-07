@@ -5,16 +5,13 @@ import { CommonEntity } from 'src/common/entities/common.entity';
 
 @Entity('carts')
 export class Cart extends CommonEntity {
-  @OneToOne(() => User, (user) => user.cart, { eager: true })
+  @OneToOne(() => User, (user) => user.cart)
   @JoinColumn()
   public user: User;
 
-  @OneToMany(() => CartItem, (item) => item.cart)
+  @OneToMany(() => CartItem, (item) => item.cart, { eager: true })
   public items: CartItem[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   public total: number;
-
-  // @OneToMany(() => Order, (order) => order.cart)
-  // order: Order;
 }
