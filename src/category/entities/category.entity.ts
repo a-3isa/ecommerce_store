@@ -13,7 +13,7 @@ export class Category extends CommonEntity {
   @ManyToOne(() => Category, (category) => category.children, {
     nullable: true,
   })
-  public parent: Category;
+  public parent: Category | null;
 
   @OneToMany(() => Category, (category) => category.parent)
   public children: Category[];

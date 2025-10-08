@@ -12,8 +12,8 @@ import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { User } from 'src/user/entities/user.entity';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { ShipmentIndexesDto } from './dto/shipment-index.dto';
 
 @Injectable()
 export class OrderService {
@@ -41,10 +41,12 @@ export class OrderService {
     this.stripe = new Stripe(stripeApiKey);
   }
 
-  async createOrder(cartId: string, user: User): Promise<Order> {
-    if (!cartId) {
-      throw new BadRequestException('Cart ID is required to create an order');
-    }
+  async createOrder(
+    // cartId: string,
+    user: User,
+    shippingAddressIndex: number,
+    billingInfoIndex: number,
+  ): Promise<Order> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: user.id } },
       relations: [
@@ -66,22 +68,20 @@ export class OrderService {
       const orderRepo = queryRunner.manager.getRepository(Order);
       const orderItemRepo = queryRunner.manager.getRepository(OrderItem);
       const cartRepo = queryRunner.manager.getRepository(Cart);
+      const cartItemRepo = queryRunner.manager.getRepository(CartItem);
 
       // Create order
       const order = orderRepo.create({
         user: { id: user.id },
         total: cart.total,
-        shippingAddress: user.shippingAddress?.[0] || '',
-        billingInfo: user.billingInfo?.[0] || '',
+        shippingAddress: user.shippingAddress[shippingAddressIndex],
+        billingInfo: user.billingInfo[billingInfoIndex],
       });
 
       await orderRepo.save(order);
 
       // Create order items from cart items
       const orderItems = cart.items.map((cartItem) => {
-        if (!cartItem.productVariant.product) {
-          throw new BadRequestException('Product not found for variant');
-        }
         return orderItemRepo.create({
           order: { id: order.id },
           product: cartItem.productVariant.product,
@@ -92,7 +92,6 @@ export class OrderService {
       await orderItemRepo.save(orderItems);
 
       // Clear cart items
-      const cartItemRepo = queryRunner.manager.getRepository(CartItem);
       await cartItemRepo.remove(cart.items);
       cart.total = 0;
       cart.items = [];
@@ -116,7 +115,8 @@ export class OrderService {
     }
   }
 
-  async payStripe(user: User) {
+  async payStripe(shipmentIndexes: ShipmentIndexesDto, user: User) {
+    const { shippingAddressIndex, billingInfoIndex } = shipmentIndexes;
     const cart = await this.cartRepository.findOne({
       where: { user: { id: user.id } },
       relations: [
@@ -148,7 +148,11 @@ export class OrderService {
       cancel_url: 'https://www.iana.org/help/example-domains',
 
       client_reference_id: user.id,
-      metadata: { cartId: cart.id },
+      metadata: {
+        // cartId: cart.id,
+        shipping_address: shippingAddressIndex,
+        billing_name: billingInfoIndex,
+      },
     });
 
     return session.url;
@@ -176,10 +180,12 @@ export class OrderService {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      const cartId = session.metadata?.cartId;
+      // const cartId = session.metadata?.cartId;
       const userId = session.client_reference_id;
+      const shippingAddressIndex = session.metadata?.shipping_address ?? 0;
+      const billingInfoIndex = session.metadata?.billing_name ?? 0;
 
-      if (!cartId || !userId) {
+      if (!userId) {
         throw new BadRequestException(
           'Missing cartId or userId in webhook data',
         );
@@ -190,11 +196,14 @@ export class OrderService {
         throw new BadRequestException('User not found');
       }
 
-      const order = await this.createOrder(cartId, user);
-      console.log('haaaaaaaaaaaaaaaow');
+      const order = await this.createOrder(
+        // cartId,
+        user,
+        +shippingAddressIndex,
+        +billingInfoIndex,
+      );
       order.status = OrderStatus.PAID;
       await this.orderRepository.save(order);
-      console.log(order);
     }
 
     return { received: true };
@@ -260,9 +269,4 @@ export class OrderService {
       );
     }
   }
-
-  // async remove(id: string, user?: User): Promise<void> {
-  //   const order = await this.findOne(id, user);
-  //   await this.orderRepository.remove(order);
-  // }
 }

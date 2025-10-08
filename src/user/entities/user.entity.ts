@@ -35,11 +35,11 @@ export class User {
   })
   public role: UserRole;
 
-  @Column({ type: 'text', nullable: true })
-  public shippingAddress: string[];
+  @Column({ type: 'text' })
+  public shippingAddress: string;
 
-  @Column({ type: 'text', nullable: true })
-  public billingInfo: string[];
+  @Column({ type: 'text' })
+  public billingInfo: string;
 
   @OneToOne(() => Cart, (cart) => cart.user, { eager: true })
   @JoinColumn()

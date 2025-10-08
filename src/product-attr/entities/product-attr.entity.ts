@@ -6,7 +6,7 @@ import { Product } from 'src/product/entities/product.entity';
 
 @Entity('product_attributes')
 export class ProductAttribute extends CommonEntity {
-  @Column({ length: 100 })
+  @Column({ length: 100, unique: true })
   public displayName: string; // e.g., "Color", "Size", "Material"
 
   @ManyToMany(() => Product, (product) => product.attr)

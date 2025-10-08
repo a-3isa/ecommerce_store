@@ -6,24 +6,24 @@ import {
   Req,
   Res,
   Get,
-  Patch,
   Param,
-  Delete,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { Request, Response } from 'express';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { ShipmentIndexesDto } from './dto/shipment-index.dto';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post('/checkout')
-  payStripe(@GetUser() user: User) {
-    return this.orderService.payStripe(user);
+  payStripe(
+    @Body() shipmentIndexes: ShipmentIndexesDto,
+    @GetUser() user: User,
+  ) {
+    return this.orderService.payStripe(shipmentIndexes, user);
   }
 
   // @Post('/checkout')
@@ -40,7 +40,6 @@ export class OrderController {
     try {
       const result = await this.orderService.handleWebhook(req.body, signature);
       res.json(result);
-      console.log(result);
     } catch (error) {
       res.status(400).send(`Webhook Error: ${error}`);
     }
@@ -56,10 +55,10 @@ export class OrderController {
     return this.orderService.findOne(id, user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(id, updateOrderDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+  //   return this.orderService.update(id, updateOrderDto);
+  // }
 
   // @Delete(':id')
   // remove(@Param('id') id: string, @GetUser() user: User) {

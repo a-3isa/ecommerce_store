@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { User, UserRole } from 'src/user/entities/user.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,9 +27,10 @@ export class AuthService {
   ) {}
 
   public async register(
-    authCredentialsDto: AuthCredentialsDto,
+    createUserDto: CreateUserDto,
   ): Promise<{ accessToken: string }> {
-    const { username, email, password } = authCredentialsDto;
+    const { username, email, password, shippingAddress, billingInfo } =
+      createUserDto;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -36,6 +38,8 @@ export class AuthService {
       username,
       email,
       password: hashedPassword,
+      shippingAddress,
+      billingInfo,
     });
     try {
       await this.userRepository.insert(user);
@@ -69,9 +73,10 @@ export class AuthService {
   }
 
   public async adminRegister(
-    authCredentialsDto: AuthCredentialsDto,
+    createUserDto: CreateUserDto,
   ): Promise<{ accessToken: string }> {
-    const { username, email, password } = authCredentialsDto;
+    const { username, email, password, shippingAddress, billingInfo } =
+      createUserDto;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -80,8 +85,9 @@ export class AuthService {
       email,
       password: hashedPassword,
       role: UserRole.ADMIN,
+      shippingAddress,
+      billingInfo,
     });
-    console.log(user);
     try {
       const savedUser = await this.userRepository.save(user);
       // Create cart for new user

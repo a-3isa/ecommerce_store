@@ -1,14 +1,15 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/register')
-  public async register(@Body() authCredentialsDto: AuthCredentialsDto) {
-    await this.authService.register(authCredentialsDto);
+  public async register(@Body() createUserDto: CreateUserDto) {
+    await this.authService.register(createUserDto);
     return 'Welcome to the store';
   }
 
@@ -21,8 +22,8 @@ export class AuthController {
 
   // @UseGuards(RoleGuard)
   @Post('/adminRegister')
-  public async adminRegister(@Body() authCredentialsDto: AuthCredentialsDto) {
-    await this.authService.adminRegister(authCredentialsDto);
+  public async adminRegister(@Body() createUserDto: CreateUserDto) {
+    await this.authService.adminRegister(createUserDto);
     return 'Welcome to the store';
   }
 }

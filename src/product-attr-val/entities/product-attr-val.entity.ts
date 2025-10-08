@@ -15,7 +15,7 @@ export class ProductAttributeValue extends CommonEntity {
   @Index()
   public attr: ProductAttribute;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', unique: true })
   @Index()
   public value: string;
 

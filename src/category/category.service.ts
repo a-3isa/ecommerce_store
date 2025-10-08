@@ -14,15 +14,20 @@ export class CategoryService {
   ) {}
   public async create(createCategoryDto: CreateCategoryDto) {
     const { parentId, ...rest } = createCategoryDto;
-    const parent = await this.categoryRepo.findOne({ where: { id: parentId } });
-    if (!parent) {
-      throw new NotFoundException(
-        `Parent Category with ID ${parentId} not found`,
-      );
+    let parent: Category | null = null;
+    if (parentId) {
+      parent = await this.categoryRepo.findOne({
+        where: { id: parentId },
+      });
+      if (!parent) {
+        throw new NotFoundException(
+          `Parent Category with ID ${parentId} not found`,
+        );
+      }
     }
     const category = this.categoryRepo.create({
       ...rest,
-      parent: parent,
+      parent: parent as any,
     });
 
     return await this.categoryRepo.insert(category);

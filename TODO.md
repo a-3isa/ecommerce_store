@@ -3,3 +3,4 @@
 - [x] Uncomment update method in order.service.ts and add transition validation
 - [x] Uncomment update endpoint in order.controller.ts
 - [x] Test the workflow transitions
+- [x] Create seed script to populate database with categories, product attributes, attribute values, products, and product variants
