@@ -40,8 +40,9 @@ export class OrderController {
     try {
       const result = await this.orderService.handleWebhook(req.body, signature);
       res.json(result);
+      console.log(result);
     } catch (error) {
-      res.status(400).send(`Webhook Error: ${error.message}`);
+      res.status(400).send(`Webhook Error: ${error}`);
     }
   }
 
@@ -51,21 +52,17 @@ export class OrderController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @GetUser() user: User) {
+  findOne(@Param() id: string, @GetUser() user: User) {
     return this.orderService.findOne(id, user);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateOrderDto: UpdateOrderDto,
-    @GetUser() user: User,
-  ) {
-    return this.orderService.update(id, updateOrderDto, user);
+  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+    return this.orderService.update(id, updateOrderDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @GetUser() user: User) {
-    return this.orderService.remove(id, user);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string, @GetUser() user: User) {
+  //   return this.orderService.remove(id, user);
+  // }
 }

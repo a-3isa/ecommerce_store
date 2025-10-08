@@ -41,20 +41,18 @@ export class OrderService {
     this.stripe = new Stripe(stripeApiKey);
   }
 
-  async initiateOrder(cartId: string, user: User): Promise<Order> {
+  async createOrder(cartId: string, user: User): Promise<Order> {
     if (!cartId) {
       throw new BadRequestException('Cart ID is required to create an order');
     }
-    console.log('1');
     const cart = await this.cartRepository.findOne({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: [
         'items',
         'items.productVariant',
         'items.productVariant.product',
       ],
     });
-    console.log('2');
 
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('Cart not found or empty');
@@ -63,7 +61,6 @@ export class OrderService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log('3');
 
     try {
       const orderRepo = queryRunner.manager.getRepository(Order);
@@ -79,7 +76,6 @@ export class OrderService {
       });
 
       await orderRepo.save(order);
-      console.log('4');
 
       // Create order items from cart items
       const orderItems = cart.items.map((cartItem) => {
@@ -93,9 +89,7 @@ export class OrderService {
           price: cartItem.price,
         });
       });
-      console.log(orderItems);
       await orderItemRepo.save(orderItems);
-      console.log('s');
 
       // Clear cart items
       const cartItemRepo = queryRunner.manager.getRepository(CartItem);
@@ -103,10 +97,8 @@ export class OrderService {
       cart.total = 0;
       cart.items = [];
       await cartRepo.save(cart);
-      console.log('12');
 
       await queryRunner.commitTransaction();
-      console.log('92');
 
       const result = await this.orderRepository.findOne({
         where: { id: order.id },
@@ -126,15 +118,18 @@ export class OrderService {
 
   async payStripe(user: User) {
     const cart = await this.cartRepository.findOne({
-      where: { user },
-      relations: ['items', 'items.productVariant'],
+      where: { user: { id: user.id } },
+      relations: [
+        'items',
+        'items.productVariant',
+        'items.productVariant.product',
+      ],
     });
-    // console.log(cart);
-    // console.log(cart?.id);
 
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('Cart not found or empty');
     }
+    // console.log(cart.items[0].productVariant);
 
     const session = await this.stripe.checkout.sessions.create({
       line_items: cart.items.map((item) => ({
@@ -142,46 +137,22 @@ export class OrderService {
           currency: 'egp',
           unit_amount: Math.round(item.productVariant.price * 100), // Stripe expects cents
           product_data: {
-            name: 'medo',
+            name: item.productVariant.product.name ?? 'medo',
             // images: [item.productVariant.product.image],
           },
         },
         quantity: item.quantity,
       })),
       mode: 'payment',
-      success_url: 'https://example.com/',
-      cancel_url: 'https://bad.com/lander',
+      success_url: 'https://example.com/success',
+      cancel_url: 'https://www.iana.org/help/example-domains',
+
       client_reference_id: user.id,
       metadata: { cartId: cart.id },
     });
 
     return session.url;
   }
-
-  // async payStripe(createOrderDto: CreateOrderDto, user: User) {
-  //   const { items } = createOrderDto;
-  //   const session = await this.stripe.checkout.sessions.create({
-  //     line_items: items.map((item) => ({
-  //       price_data: {
-  //         currency: 'egp',
-  //         unit_amount: Math.round(item.price * 100), // Stripe expects cents
-  //         product_data: {
-  //           name: item.name,
-  //           images: [item.imageUrl],
-  //         },
-  //       },
-  //       quantity: item.quantity,
-  //     })),
-  //     mode: 'payment',
-  //     success_url: 'https://example.com/',
-  //     cancel_url: 'https://bad.com/lander',
-  //     client_reference_id: user.id,
-  //     // metadata: { cartId },
-  //   });
-
-  //   return session.url;
-  //   // }
-  // }
 
   async handleWebhook(body: any, signature: string) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -199,16 +170,14 @@ export class OrderService {
         webhookSecret,
       );
     } catch (err) {
-      console.log(`⚠️ Webhook signature verification failed.`, err.message);
+      console.log(`⚠️ Webhook signature verification failed.`, err);
       throw new BadRequestException('Invalid Stripe webhook signature');
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object;
       const cartId = session.metadata?.cartId;
       const userId = session.client_reference_id;
-
-      console.log('heeeeeeeeeeeey');
 
       if (!cartId || !userId) {
         throw new BadRequestException(
@@ -217,16 +186,15 @@ export class OrderService {
       }
 
       const user = await this.userRepository.findOne({ where: { id: userId } });
-      console.log(user);
       if (!user) {
         throw new BadRequestException('User not found');
       }
 
-      const order = await this.initiateOrder(cartId, user);
+      const order = await this.createOrder(cartId, user);
       console.log('haaaaaaaaaaaaaaaow');
       order.status = OrderStatus.PAID;
       await this.orderRepository.save(order);
-      console.log('meaaaaaaaaaaaaaaaw');
+      console.log(order);
     }
 
     return { received: true };
@@ -240,12 +208,9 @@ export class OrderService {
     });
   }
 
-  async findOne(id: string, user?: User): Promise<Order> {
-    const where: any = { id };
-    if (user) where.user = user;
-
+  async findOne(id: string, user: User): Promise<Order> {
     const order = await this.orderRepository.findOne({
-      where,
+      where: { user: { id: user.id }, id },
       relations: ['user', 'items', 'items.product'],
     });
 
@@ -256,12 +221,12 @@ export class OrderService {
     return order;
   }
 
-  async update(
-    id: string,
-    updateOrderDto: UpdateOrderDto,
-    user?: User,
-  ): Promise<Order> {
-    const order = await this.findOne(id, user);
+  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
+    const order = await this.orderRepository.findOne({ where: { id } });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
 
     if (updateOrderDto.status) {
       this.validateStatusTransition(order.status, updateOrderDto.status);
@@ -270,7 +235,11 @@ export class OrderService {
     Object.assign(order, updateOrderDto);
     await this.orderRepository.save(order);
 
-    return this.findOne(id, user);
+    const updatedOrder = await this.orderRepository.findOne({ where: { id } });
+    if (!updatedOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found after update`);
+    }
+    return updatedOrder;
   }
 
   private validateStatusTransition(
@@ -292,8 +261,8 @@ export class OrderService {
     }
   }
 
-  async remove(id: string, user?: User): Promise<void> {
-    const order = await this.findOne(id, user);
-    await this.orderRepository.remove(order);
-  }
+  // async remove(id: string, user?: User): Promise<void> {
+  //   const order = await this.findOne(id, user);
+  //   await this.orderRepository.remove(order);
+  // }
 }
