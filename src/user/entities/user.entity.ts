@@ -1,5 +1,6 @@
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Order } from 'src/order/entities/order.entity';
+import { Transaction } from 'src/transaction/entities/transaction.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -47,4 +48,7 @@ export class User {
 
   @OneToMany(() => Order, (order) => order.user, { eager: true })
   public orders: Order[];
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  public transactions: Transaction[];
 }

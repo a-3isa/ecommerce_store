@@ -2,6 +2,7 @@ import { Entity, OneToMany, ManyToOne, Column } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 import { CommonEntity } from 'src/common/entities/common.entity';
+import { Transaction } from 'src/transaction/entities/transaction.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -25,6 +26,9 @@ export class Order extends CommonEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   public total: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  public discountAmount: number;
+
   @Column({
     type: 'enum',
     enum: OrderStatus,
@@ -37,4 +41,7 @@ export class Order extends CommonEntity {
 
   @Column({ type: 'text', nullable: true })
   public billingInfo: string;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.order)
+  public transactions: Transaction[];
 }

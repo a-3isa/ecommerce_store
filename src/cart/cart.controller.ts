@@ -8,7 +8,7 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Get('me')
+  @Get()
   getMyCart(@GetUser() user: User) {
     return this.cartService.getCartByUser(user);
   }

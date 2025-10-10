@@ -18,7 +18,7 @@ export class ProductAttrValService {
   async create(
     createProductAttrValDto: CreateProductAttrValDto,
   ): Promise<InsertResult> {
-    console.log(createProductAttrValDto);
+    // console.log(createProductAttrValDto);
     const { attrId, value } = createProductAttrValDto;
     const productAttr = await this.productAttrRepository.findOne({
       where: { id: attrId },

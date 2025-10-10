@@ -10,10 +10,16 @@ import { OrderItem } from './entities/order-item.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { User } from 'src/user/entities/user.entity';
+import {
+  Transaction,
+  TransactionStatus,
+  PaymentMethod,
+} from 'src/transaction/entities/transaction.entity';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ShipmentIndexesDto } from './dto/shipment-index.dto';
+import { CouponService } from 'src/coupon/coupon.service';
 
 @Injectable()
 export class OrderService {
@@ -30,9 +36,12 @@ export class OrderService {
     private cartItemRepository: Repository<CartItem>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
 
     private dataSource: DataSource,
     private configService: ConfigService,
+    private couponService: CouponService,
   ) {
     const stripeApiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeApiKey) {
@@ -46,6 +55,8 @@ export class OrderService {
     user: User,
     shippingAddressIndex: number,
     billingInfoIndex: number,
+    total: number,
+    discountAmount: number = 0,
   ): Promise<Order> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: user.id } },
@@ -73,7 +84,8 @@ export class OrderService {
       // Create order
       const order = orderRepo.create({
         user: { id: user.id },
-        total: cart.total,
+        total,
+        discountAmount,
         shippingAddress: user.shippingAddress[shippingAddressIndex],
         billingInfo: user.billingInfo[billingInfoIndex],
       });
@@ -115,7 +127,11 @@ export class OrderService {
     }
   }
 
-  async payStripe(shipmentIndexes: ShipmentIndexesDto, user: User) {
+  async payStripe(
+    shipmentIndexes: ShipmentIndexesDto,
+    user: User,
+    couponCode?: string,
+  ) {
     const { shippingAddressIndex, billingInfoIndex } = shipmentIndexes;
     const cart = await this.cartRepository.findOne({
       where: { user: { id: user.id } },
@@ -129,13 +145,44 @@ export class OrderService {
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('Cart not found or empty');
     }
+
+    const originalTotal = cart.total;
+    let totalDiscount = 0;
+    let discountedItems = cart.items.map((item) => ({
+      productId: item.productVariant.product.id,
+      price: item.productVariant.price,
+      quantity: item.quantity,
+      discountedPrice: item.productVariant.price,
+    }));
+
+    if (couponCode) {
+      const coupon = await this.couponService.findByCode(couponCode);
+      if (!(await this.couponService.isValidForOrder(coupon, originalTotal))) {
+        throw new BadRequestException('Invalid coupon');
+      }
+
+      const orderItemsForDiscount = cart.items.map((item) => ({
+        productId: item.productVariant.product.id,
+        price: item.productVariant.price,
+        quantity: item.quantity,
+      }));
+
+      const result = this.couponService.applyCouponToOrder(
+        coupon,
+        orderItemsForDiscount,
+        originalTotal,
+      );
+      discountedItems = result.discountedItems;
+      totalDiscount = result.totalDiscount;
+    }
+
     // console.log(cart.items[0].productVariant);
 
     const session = await this.stripe.checkout.sessions.create({
-      line_items: cart.items.map((item) => ({
+      line_items: cart.items.map((item, index) => ({
         price_data: {
           currency: 'egp',
-          unit_amount: Math.round(item.productVariant.price * 100), // Stripe expects cents
+          unit_amount: Math.round(discountedItems[index].discountedPrice * 100), // Stripe expects cents
           product_data: {
             name: item.productVariant.product.name ?? 'medo',
             // images: [item.productVariant.product.image],
@@ -152,6 +199,11 @@ export class OrderService {
         // cartId: cart.id,
         shipping_address: shippingAddressIndex,
         billing_name: billingInfoIndex,
+        ...(couponCode && {
+          couponCode,
+          totalDiscount: totalDiscount.toString(),
+          originalTotal: originalTotal.toString(),
+        }),
       },
     });
 
@@ -196,14 +248,59 @@ export class OrderService {
         throw new BadRequestException('User not found');
       }
 
+      const paidTotal = (session.amount_total || 0) / 100;
+      const discountAmount = session.metadata?.totalDiscount
+        ? parseFloat(session.metadata.totalDiscount)
+        : 0;
+
       const order = await this.createOrder(
-        // cartId,
         user,
         +shippingAddressIndex,
         +billingInfoIndex,
+        paidTotal,
+        discountAmount,
       );
       order.status = OrderStatus.PAID;
       await this.orderRepository.save(order);
+
+      // Create transaction record
+      const paymentMethodType = session.payment_method_types?.[0];
+      const paymentMethod =
+        paymentMethodType === 'card'
+          ? PaymentMethod.CREDIT_CARD
+          : paymentMethodType === 'paypal'
+            ? PaymentMethod.PAYPAL
+            : PaymentMethod.CASH; // Default
+
+      const transaction = this.transactionRepository.create({
+        user: { id: user.id },
+        order: { id: order.id },
+        amount: (session.amount_total || 0) / 100, // Convert from cents
+        currency: (session.currency || 'usd').toUpperCase(),
+        paymentMethod,
+        status: TransactionStatus.COMPLETED,
+        transactionId: session.id,
+        metadata: {
+          stripeSessionId: session.id,
+          paymentIntentId: session.payment_intent,
+          amountTotal: session.amount_total,
+          currency: session.currency,
+          paymentMethodTypes: session.payment_method_types,
+        },
+      });
+      await this.transactionRepository.save(transaction);
+
+      if (session.metadata?.couponCode) {
+        try {
+          const coupon = await this.couponService.findByCode(
+            session.metadata.couponCode,
+          );
+          await this.couponService.incrementUsage(coupon);
+        } catch (error) {
+          // Log error but continue since payment succeeded
+          console.error('Failed to increment coupon usage:', error);
+        }
+      }
     }
 
     return { received: true };
