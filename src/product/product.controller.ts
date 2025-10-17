@@ -19,6 +19,8 @@ import { ProductIdDto } from './dto/product-id.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
 import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
 import { FileInterceptor } from 'node_modules/@nestjs/platform-express';
+import { LogMethod } from './decorators/logging.decorator';
+import { ValidateRequest } from './decorators/validation.decorator';
 
 @Controller('product')
 // @UseInterceptors(ClassSerializerInterceptor)
@@ -27,6 +29,8 @@ export class ProductController {
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
+  @LogMethod()
+  @ValidateRequest()
   public create(
     @UploadedFile() file: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
@@ -53,6 +57,8 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @LogMethod()
+  @ValidateRequest()
   public async update(
     @Param('id') productId: ProductIdDto,
     @Body() updateProductDto: UpdateProductDto,
@@ -70,6 +76,7 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @LogMethod()
   public async remove(@Param('id') id: ProductIdDto) {
     try {
       await this.productService.remove(id);
@@ -83,6 +90,8 @@ export class ProductController {
 
   @Get('search')
   @UseInterceptors(CacheInterceptor)
+  @LogMethod()
+  @ValidateRequest()
   public async searchProducts(@Query() filterDto: ProductFilterDto) {
     return this.productService.searchProducts(filterDto);
   }

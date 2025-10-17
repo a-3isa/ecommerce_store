@@ -7,8 +7,6 @@ import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { APP_GUARD } from '@nestjs/core';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { ProductAttrModule } from './product-attr/product-attr.module';
@@ -22,6 +20,7 @@ import { CouponModule } from './coupon/coupon.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { MailerModule } from 'node_modules/@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { CommonModule } from './common/common.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -71,6 +70,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       inject: [ConfigService],
     }),
 
+    CommonModule,
     UserModule,
     AuthModule,
     CategoryModule,
@@ -86,12 +86,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     RabbitMQModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
