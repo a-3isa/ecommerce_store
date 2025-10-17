@@ -8,10 +8,6 @@ import {
 import { BaseCreateDto } from 'src/common/dto/common.dto';
 
 export class CreateProductDto extends BaseCreateDto {
-  @IsString()
-  @IsOptional()
-  public image?: string;
-
   @IsNumber()
   @IsOptional()
   public stock?: number = 0;

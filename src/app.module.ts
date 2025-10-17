@@ -22,7 +22,6 @@ import { CouponModule } from './coupon/coupon.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { MailerModule } from 'node_modules/@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -71,6 +70,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       }),
       inject: [ConfigService],
     }),
+
     UserModule,
     AuthModule,
     CategoryModule,

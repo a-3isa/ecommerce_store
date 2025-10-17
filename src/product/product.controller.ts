@@ -10,6 +10,7 @@ import {
   NotFoundException,
   BadRequestException,
   UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -17,6 +18,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductIdDto } from './dto/product-id.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
 import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
+import { FileInterceptor } from 'node_modules/@nestjs/platform-express';
 
 @Controller('product')
 // @UseInterceptors(ClassSerializerInterceptor)
@@ -24,8 +26,12 @@ export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Post()
-  public create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @UseInterceptors(FileInterceptor('image'))
+  public create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    return this.productService.create(createProductDto, file);
   }
 
   @Get()

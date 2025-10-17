@@ -10,6 +10,7 @@ import { ProductIdDto } from './dto/product-id.dto';
 import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 import { Category } from 'src/category/entities/category.entity';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductService {
@@ -22,9 +23,13 @@ export class ProductService {
     private attributeValueRepository: Repository<ProductAttributeValue>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  public async create(createProductDto: CreateProductDto): Promise<Product> {
+  public async create(
+    createProductDto: CreateProductDto,
+    file?: Express.Multer.File,
+  ): Promise<Product> {
     const [attributes, attributeValues, category] = await Promise.all([
       this.attributeRepository.findBy({
         id: In(createProductDto.attributesId),
@@ -52,18 +57,24 @@ export class ProductService {
         `Attribute values not found for IDs: ${createProductDto.attributesValId}`,
       );
     }
+    let imageUrl: string | undefined;
+
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadImage(file);
+      imageUrl = uploadResult.secure_url as string;
+    }
 
     const product = this.productRepository.create({
       name: createProductDto.name,
       slug: createProductDto.slug,
       description: createProductDto.description,
-      // price: createProductDto.price,
-      // stock: createProductDto.stock,
+
       sku: createProductDto.sku,
       barcode: createProductDto.barcode,
       category: category,
       attr: attributes,
       attrValues: attributeValues,
+      imageUrl: imageUrl,
     });
 
     return await this.productRepository.save(product);

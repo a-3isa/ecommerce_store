@@ -27,7 +27,7 @@ export class CategoryService {
     }
     const category = this.categoryRepo.create({
       ...rest,
-      parent: parent as any,
+      parent: parent,
     });
 
     return await this.categoryRepo.insert(category);

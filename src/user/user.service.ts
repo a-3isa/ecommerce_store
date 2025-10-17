@@ -49,13 +49,8 @@ export class UserService {
       const salt = await genSalt();
       updateUserDto.password = await hash(updateUserDto.password, salt);
     }
-    const updateData: any = { ...updateUserDto };
-    if (updateData.address) {
-      updateData.address = [updateData.address];
-    }
-    if (updateData.billingInfo) {
-      updateData.billingInfo = [updateData.billingInfo];
-    }
+    const updateData = { ...updateUserDto };
+
     await this.userRepository.update(user.id, updateData);
     return this.findOne(user.id);
   }

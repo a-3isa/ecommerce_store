@@ -25,8 +25,8 @@ export class Product extends CommonEntity {
   @Column({ type: 'text', nullable: true })
   public description: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  public image: string;
+  @Column({ nullable: true })
+  imageUrl?: string;
 
   // @Column({ type: 'int', default: 0 })
   // public stock: number;

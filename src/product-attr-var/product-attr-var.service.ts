@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, InsertResult, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ProductVariant } from './entities/product-attr-var.entity';
 import { CreateProductAttrVarDto } from './dto/create-product-attr-var.dto';
 import { UpdateProductAttrVarDto } from './dto/update-product-attr-var.dto';
