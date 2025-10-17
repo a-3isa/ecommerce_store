@@ -5,6 +5,7 @@ import { Coupon, DiscountType, CouponType } from './entities/coupon.entity';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Product } from 'src/product/entities/product.entity';
+import { CacheLong, CacheWithKey } from '../product/decorators/cache.decorator';
 
 @Injectable()
 export class CouponService {
@@ -30,10 +31,12 @@ export class CouponService {
     return this.couponRepository.save(coupon);
   }
 
+  @CacheLong()
   async findAll(): Promise<Coupon[]> {
     return this.couponRepository.find({ relations: ['applicableProducts'] });
   }
 
+  @CacheWithKey('coupon:findOne', 300000)
   async findOne(id: string): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne({
       where: { id },
@@ -166,6 +169,7 @@ export class CouponService {
     await this.couponRepository.save(coupon);
   }
 
+  @CacheWithKey('coupon:findByCode', 300000)
   async findByCode(code: string): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne({
       where: { code },
