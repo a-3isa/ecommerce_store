@@ -9,6 +9,8 @@ import { CartItem } from 'src/cart/entities/cart-item.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Transaction } from 'src/transaction/entities/transaction.entity';
 import { CouponModule } from 'src/coupon/coupon.module';
+import { EmailService } from './email.service';
+import { RabbitMQModule } from 'src/rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { CouponModule } from 'src/coupon/coupon.module';
       Transaction,
     ]),
     CouponModule,
+    RabbitMQModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [OrderService, EmailService],
 })
 export class OrderModule {}

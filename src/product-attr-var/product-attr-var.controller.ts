@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductAttrVarService } from './product-attr-var.service';
 import { CreateProductAttrVarDto } from './dto/create-product-attr-var.dto';
 import { UpdateProductAttrVarDto } from './dto/update-product-attr-var.dto';
 import { ProductAttrVarIdDto } from './dto/product-attr-var-id.dto';
+import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
 
 @Controller('product-attr-var')
 export class ProductAttrVarController {
@@ -22,6 +24,7 @@ export class ProductAttrVarController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   findAll() {
     return this.productAttrVarService.findAll();
   }

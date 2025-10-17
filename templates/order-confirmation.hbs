@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Order Confirmation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { margin: 20px 0; }
+        .order-details { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        .footer { margin-top: 30px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your purchase!</p>
+    </div>
+
+    <div class="content">
+        <p>Dear {{userName}},</p>
+        <p>Your order has been successfully paid and confirmed. Here are the details:</p>
+
+        <div class="order-details">
+            <h3>Order ID: {{orderId}}</h3>
+            <p><strong>Total Amount:</strong> ${{total}}</p>
+            <p><strong>Order Date:</strong> {{orderDate}}</p>
+            {{#if discountAmount}}
+            <p><strong>Discount Applied:</strong> ${{discountAmount}}</p>
+            {{/if}}
+        </div>
+
+        <h4>Order Items:</h4>
+        <ul>
+            {{#each items}}
+            <li>{{quantity}}x {{product.name}} - ${{price}}</li>
+            {{/each}}
+        </ul>
+
+        <p>We will process your order shortly and send you shipping updates.</p>
+        <p>If you have any questions, please contact our support team.</p>
+    </div>
+
+    <div class="footer">
+        <p>Best regards,<br>Your E-commerce Team</p>
+    </div>
+</body>
+</html>

@@ -10,7 +10,6 @@ import { ProductIdDto } from './dto/product-id.dto';
 import { ProductAttribute } from 'src/product-attr/entities/product-attr.entity';
 import { ProductAttributeValue } from 'src/product-attr-val/entities/product-attr-val.entity';
 import { Category } from 'src/category/entities/category.entity';
-import { CacheLong, CacheWithKey } from './decorators/cache.decorator';
 
 @Injectable()
 export class ProductService {
@@ -70,7 +69,6 @@ export class ProductService {
     return await this.productRepository.save(product);
   }
 
-  @CacheLong()
   public async findAll(): Promise<Product[]> {
     return this.productRepository.find({
       relations: [
@@ -133,7 +131,6 @@ export class ProductService {
     await this.productRepository.remove(product);
   }
 
-  @CacheWithKey('products:search', 300000)
   public async searchProducts(filterDto: ProductFilterDto) {
     const {
       search,

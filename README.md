@@ -92,6 +92,14 @@ A robust, scalable e-commerce backend API built with NestJS, featuring an advanc
    npm run start:prod
    ```
 
+6. **Stripe Webhook Setup** (Optional, for order webhooks)
+
+   If using Stripe for payments, set up webhook forwarding:
+
+   ```bash
+   stripe listen --forward-to localhost:3000/order/webhook
+   ```
+
 The API will be available at `http://localhost:3000`
 
 ## 📚 API Documentation

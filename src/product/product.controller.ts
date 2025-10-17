@@ -6,13 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   NotFoundException,
   BadRequestException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductIdDto } from './dto/product-id.dto';
+import { ProductFilterDto } from './dto/product-filter.dto';
+import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
 
 @Controller('product')
 // @UseInterceptors(ClassSerializerInterceptor)
@@ -25,11 +29,13 @@ export class ProductController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   public findAll() {
     return this.productService.findAll();
   }
 
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
   public async findOne(@Param() productId: ProductIdDto) {
     const { id } = productId;
     const product = await this.productService.findOne(id);
@@ -67,5 +73,11 @@ export class ProductController {
       }
       throw new BadRequestException('Failed to delete product');
     }
+  }
+
+  @Get('search')
+  @UseInterceptors(CacheInterceptor)
+  public async searchProducts(@Query() filterDto: ProductFilterDto) {
+    return this.productService.searchProducts(filterDto);
   }
 }

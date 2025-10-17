@@ -10,6 +10,7 @@ import {
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { UpdateGiftDto } from './dto/update-gift.dto';
+import { GiftIdDto } from './dto/gift-id.dto';
 
 @Controller('gift')
 export class GiftController {
@@ -26,17 +27,20 @@ export class GiftController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param() giftId: GiftIdDto) {
+    const { id } = giftId;
     return this.giftService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGiftDto: UpdateGiftDto) {
+  update(@Param() giftId: GiftIdDto, @Body() updateGiftDto: UpdateGiftDto) {
+    const { id } = giftId;
     return this.giftService.update(id, updateGiftDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param() giftId: GiftIdDto) {
+    const { id } = giftId;
     return this.giftService.remove(id);
   }
 

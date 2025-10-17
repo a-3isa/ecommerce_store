@@ -69,14 +69,16 @@ export class CategoryController {
 
   @Patch('/:id')
   update(
-    @Param('id') id: string,
+    @Param() categoryId: CategoryIdDto,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
+    const { id } = categoryId;
     return this.categoryService.update(id, updateCategoryDto);
   }
 
   @Delete('/:id')
-  remove(@Param('id') id: string) {
+  remove(@Param() categoryId: CategoryIdDto) {
+    const { id } = categoryId;
     return this.categoryService.remove(id);
   }
 }

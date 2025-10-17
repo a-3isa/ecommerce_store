@@ -45,10 +45,14 @@ export class CartService {
         queryRunner.manager.getRepository(ProductVariant);
 
       // Step 2: Fetch or create cart
-      const cart = await cartRepo.findOneOrFail({
+      let cart = await cartRepo.findOne({
         where: { user: { id: user.id } },
         relations: ['items', 'items.productVariant'],
       });
+      if (!cart) {
+        cart = cartRepo.create({ user: { id: user.id } });
+        await cartRepo.save(cart);
+      }
       const productVariant = await productAttrVarRepo.findOne({
         where: { id: productVarId },
       });
@@ -64,15 +68,16 @@ export class CartService {
       // Step 4: Find existing cart item
       let cartItem = await cartItemRepo.findOne({
         where: {
-          // cart: cart,
+          cart: { id: cart.id },
           productVariant: { id: productVariant.id },
         },
       });
+      // console.log(cartItem);
 
       if (quantity === 0 && cartItem) {
         await cartItemRepo.remove(cartItem);
         cartItem = null;
-      } else if (quantity > 0) {
+      } else {
         if (cartItem) {
           cartItem.quantity = quantity;
           // console.log(cartItem.quantity);
@@ -84,12 +89,9 @@ export class CartService {
           });
           cartItem.price = cartItem.quantity * productVariant.price;
         }
-      } else {
-        // Invalid quantity (e.g., negative); throw error or handle as per validation
-        throw new BadRequestException(
-          'Quantity must be a positive number or zero',
-        );
       }
+
+      // console.log(cartItem);
 
       // Step 6: Save updated item (if still exists)
       if (cartItem) {

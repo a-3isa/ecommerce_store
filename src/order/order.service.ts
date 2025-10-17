@@ -20,6 +20,8 @@ import { ConfigService } from '@nestjs/config';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ShipmentIndexesDto } from './dto/shipment-index.dto';
 import { CouponService } from 'src/coupon/coupon.service';
+import { EmailService } from './email.service';
+import { RabbitMQService } from 'src/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class OrderService {
@@ -42,6 +44,8 @@ export class OrderService {
     private dataSource: DataSource,
     private configService: ConfigService,
     private couponService: CouponService,
+    private emailService: EmailService,
+    private rabbitService: RabbitMQService,
   ) {
     const stripeApiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeApiKey) {
@@ -300,6 +304,15 @@ export class OrderService {
           // Log error but continue since payment succeeded
           console.error('Failed to increment coupon usage:', error);
         }
+      }
+
+      // Send order confirmation email
+      try {
+        await this.rabbitService.sendOrderConfirmationEmail(order);
+        // await this.emailService.sendOrderConfirmationEmail(order);
+      } catch (error) {
+        // Log error but don't fail the payment process
+        console.error('Failed to send order confirmation email:', error);
       }
     }
 

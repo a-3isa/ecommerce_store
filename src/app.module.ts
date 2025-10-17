@@ -19,6 +19,9 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { CouponModule } from './coupon/coupon.module';
+import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
+import { MailerModule } from 'node_modules/@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -28,10 +31,31 @@ import { CouponModule } from './coupon/coupon.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get('REDIS_HOST', 'localhost'),
-        port: configService.get('REDIS_PORT', 6379),
+        host: configService.get('REDIS_HOST'),
+        port: configService.get('REDIS_PORT'),
       }),
       inject: [ConfigService],
+    }),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get<string>('MAIL_HOST'),
+          port: config.get<number>('MAIL_PORT'),
+          secure: false,
+          auth: {
+            user: config.get<string>('MAIL_USER'),
+            pass: config.get<string>('MAIL_PASS'),
+          },
+        },
+        template: {
+          dir: process.cwd() + '/templates',
+          adapter: new HandlebarsAdapter(), // use handlebars
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -59,6 +83,7 @@ import { CouponModule } from './coupon/coupon.module';
     OrderModule,
     TransactionModule,
     CouponModule,
+    RabbitMQModule,
   ],
   controllers: [AppController],
   providers: [
