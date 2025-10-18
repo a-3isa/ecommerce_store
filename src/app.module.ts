@@ -23,7 +23,13 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { CommonModule } from './common/common.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? '.env.production'
+          : '.env.development',
+    }),
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -62,10 +68,12 @@ import { CommonModule } from './common/common.module';
         host: configService.get('DB_HOST'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
-        port: configService.get('DB_PORT'),
-        database: configService.get('DB_DATABASE'),
-        autoLoadEntities: configService.get('DB_AUTO_LOAD_ENTITIES') === 'true',
-        synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
+        port: Number(configService.get('DB_PORT')),
+        database: configService.get('DB_DATABASE') as string,
+        entities: [__dirname + '/../**/*.entity.{js,ts}'],
+        autoLoadEntities: true,
+        synchronize: true,
+        logging: true,
       }),
       inject: [ConfigService],
     }),

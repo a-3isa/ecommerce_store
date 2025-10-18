@@ -1,31 +1,13 @@
-# TODO: Document APIs with Swagger
+# TODO List for Docker Setup
 
-- [x] Install @nestjs/swagger package
-- [x] Update src/main.ts to configure Swagger with DocumentBuilder and SwaggerModule
-- [x] Add Swagger decorators to src/auth/auth.controller.ts
-- [x] Add @ApiProperty decorators to auth DTOs (src/auth/dto/auth-credentials.dto.ts)
-- [x] Add Swagger decorators to src/cart/cart.controller.ts
-- [x] Add @ApiProperty decorators to cart DTOs (src/cart/dto/update-cart.dto.ts)
-- [x] Add Swagger decorators to src/category/category.controller.ts
-- [x] Add @ApiProperty decorators to category DTOs (src/category/dto/create-category.dto.ts, update-category.dto.ts, etc.)
-- [x] Add Swagger decorators to src/product/product.controller.ts
-- [x] Add @ApiProperty decorators to product DTOs (src/product/dto/create-product.dto.ts, update-product.dto.ts, etc.)
-- [x] Add Swagger decorators to src/order/order.controller.ts
-- [x] Add @ApiProperty decorators to order DTOs (src/order/dto/create-order.dto.ts, update-order.dto.ts, etc.)
-- [x] Run npm install to install dependencies
-- [x] Start the app and verify Swagger UI at http://localhost:3000/api/docs
-- [x] Add Swagger decorators to src/user/user.controller.ts
-- [x] Add @ApiProperty decorators to user DTOs (src/user/dto/create-user.dto.ts, update-user.dto.ts, user-id.dto.ts)
-- [x] Add Swagger decorators to src/gift/gift.controller.ts
-- [x] Add @ApiProperty decorators to gift DTOs (src/gift/dto/create-gift.dto.ts, gift-id.dto.ts, update-gift.dto.ts)
-- [x] Add Swagger decorators to src/coupon/coupon.controller.ts
-- [x] Add @ApiProperty decorators to coupon DTOs (src/coupon/dto/create-coupon.dto.ts, coupon-code.dto.ts, coupon-id.dto.ts, update-coupon.dto.ts)
-- [x] Add Swagger decorators to src/transaction/transaction.controller.ts
-- [x] Add @ApiProperty decorators to transaction DTOs (src/transaction/dto/transaction-id.dto.ts, update-transaction.dto.ts)
-- [x] Add Swagger decorators to src/product-attr/product-attr.controller.ts
-- [x] Add @ApiProperty decorators to product-attr DTOs (src/product-attr/dto/create-product-attr.dto.ts, product-attr-id.dto.ts, update-product-attr.dto.ts)
-- [x] Add Swagger decorators to src/product-attr-val/product-attr-val.controller.ts
-- [x] Add @ApiProperty decorators to product-attr-val DTOs (src/product-attr-val/dto/create-product-attr-val.dto.ts, product-attr-val-id.dto.ts, update-product-attr-val.dto.ts)
-- [x] Add Swagger decorators to src/product-attr-var/product-attr-var.controller.ts
-- [x] Add @ApiProperty decorators to product-attr-var DTOs (src/product-attr-var/dto/create-product-attr-var.dto.ts, product-attr-var-id.dto.ts, update-product-attr-var.dto.ts)
-- [x] Add @ApiProperty decorators to src/common/dto/common.dto.ts if needed
+- [x] Update src/rabbitmq/rabbitmq.module.ts to use RABBITMQ_URI environment variable
+- [x] Create Dockerfile for the NestJS backend
+- [x] Create docker-compose.yml with services for postgres, redis, rabbitmq, and backend
+- [x] Test the Docker setup (run docker-compose up)
+
+# TODO List for CI/CD Implementation
+
+- [x] Create .github/workflows/ci.yml for GitHub Actions CI/CD
+  - [x] Set up workflow triggers (push and PR to main)
+  - [x] Add CI job: Node.js setup, install deps, lint, test, build
+  - [x] Add CD job: Build and push Docker image to GitHub Container Registry on main pushes

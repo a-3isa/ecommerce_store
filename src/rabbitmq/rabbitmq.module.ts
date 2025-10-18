@@ -1,17 +1,26 @@
 import { Module } from '@nestjs/common';
 import { RabbitMQModule as GolevelupRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { RabbitMQService } from './rabbitmq.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    GolevelupRabbitMQModule.forRoot({
-      uri: 'amqp://guest:guest@localhost:5672',
-      exchanges: [
-        {
-          name: 'email_exchange',
-          type: 'topic',
+    ConfigModule,
+    GolevelupRabbitMQModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get('RABBITMQ_URI'),
+        connectionOptions: {
+          timeout: 100000, // Increase timeout to 10 seconds
         },
-      ],
+        exchanges: [
+          {
+            name: 'email_exchange',
+            type: 'topic',
+          },
+        ],
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [RabbitMQService],

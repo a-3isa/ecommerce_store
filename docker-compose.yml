@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: ecommerce_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "ecommerce_store"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "0000"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+    command:
+      [
+        "postgres",
+        "-c",
+        "listen_addresses=*",
+        "-c",
+        "hba_file=/etc/postgresql/pg_hba.conf",
+      ]
+
+    networks:
+      - ecommerce_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce_network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ecommerce_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - ecommerce_network
+
+  backend:
+    build: .
+    container_name: ecommerce_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    # Use .env.development by default; change to .env.production for production
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - ecommerce_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  ecommerce_network:
+    driver: bridge
