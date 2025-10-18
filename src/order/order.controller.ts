@@ -8,17 +8,30 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiHeader,
+} from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { Request, Response } from 'express';
 import { ShipmentIndexesDto } from './dto/shipment-index.dto';
 
+@ApiTags('orders')
+@ApiBearerAuth('JWT-auth')
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post('/checkout')
+  @ApiOperation({ summary: 'Checkout and pay with Stripe' })
+  @ApiResponse({ status: 201, description: 'Payment initiated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   payStripe(
     @Body() shipmentIndexes: ShipmentIndexesDto,
     @GetUser() user: User,
@@ -32,6 +45,10 @@ export class OrderController {
   // }
 
   @Post('/webhook')
+  @ApiOperation({ summary: 'Handle Stripe webhook' })
+  @ApiHeader({ name: 'stripe-signature', description: 'Stripe signature' })
+  @ApiResponse({ status: 200, description: 'Webhook handled successfully' })
+  @ApiResponse({ status: 400, description: 'Webhook error' })
   async handleWebhook(
     @Req() req: Request,
     @Res() res: Response,
@@ -46,11 +63,17 @@ export class OrderController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get user orders' })
+  @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
   findAll(@GetUser() user: User) {
     return this.orderService.findAll(user);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get order by ID' })
+  @ApiParam({ name: 'id', description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
   findOne(@Param() id: string, @GetUser() user: User) {
     return this.orderService.findOne(id, user);
   }

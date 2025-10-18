@@ -1,47 +1,61 @@
-# E-Commerce Store Backend API
+# 🛒 E-Commerce Store Backend API
 
-A robust, scalable e-commerce backend API built with NestJS, featuring an advanced Entity-Attribute-Value (EAV) product system, JWT authentication, and comprehensive product filtering capabilities.
+A powerful and scalable e-commerce backend built with NestJS! 🚀 Features JWT authentication, advanced EAV product system, smart filtering, shopping cart, order management, coupons, gifts, transactions, and more. Perfect for modern online stores. 💼
 
-## 🚀 Features
+## ✨ Features
 
 ### Core Features
 
-- **User Management**: Complete user registration, authentication, and profile management
-- **JWT Authentication**: Secure token-based authentication with role-based access control
-- **Category Management**: Hierarchical category structure for product organization
-- **Advanced Product System**: Flexible EAV (Entity-Attribute-Value) model for dynamic product attributes
-- **Smart Filtering**: Advanced product filtering by attributes, categories, price, and search terms
-- **Search Functionality**: Full-text search across products with attribute-based filtering
+- 👤 **User Management**: Registration, login, profiles, and role-based access
+- 🔐 **JWT Authentication**: Secure token-based auth with Passport
+- 📂 **Category Management**: Hierarchical categories for organizing products
+- 🏷️ **Advanced Product System**: Flexible EAV (Entity-Attribute-Value) for dynamic attributes like color, size, etc.
+- 🔍 **Smart Filtering & Search**: Filter by attributes, price, category, and full-text search
+- 🛒 **Shopping Cart**: Add, update, and manage cart items
+- 📦 **Order Management**: Create orders, handle shipments, email confirmations
+- 🎁 **Gift System**: Manage gift products and options
+- 🎫 **Coupon System**: Apply discounts with coupon codes
+- 💳 **Transaction Handling**: Process payments and track transactions
+- 🖼️ **Image Management**: Cloudinary integration for product images
+- 📧 **Email Services**: Order confirmations via Mailer and Handlebars templates
+- 🐰 **Message Queue**: RabbitMQ for async processing
+- 💰 **Payment Integration**: Stripe for secure payments
+- 📊 **Caching**: Redis support for performance
+- 🛡️ **Rate Limiting**: Throttler for API protection
 
 ### EAV Product System
 
-- **Dynamic Attributes**: Create custom attributes (color, size, material, etc.) without schema changes
-- **Flexible Data Types**: Support for text, number, boolean, date, select, and multiselect attributes
-- **Attribute Management**: Complete CRUD operations for product attributes
-- **Validation Rules**: Built-in validation for attribute values
-- **Category-Specific Attributes**: Different attributes per category
+- 🔧 **Dynamic Attributes**: Create custom attributes without schema changes
+- 📋 **Data Types**: Text, number, boolean, date, select, multiselect
+- ✅ **Validation**: Built-in rules for attribute values
+- 📁 **Category-Specific**: Attributes per category
 
-## 🛠 Technology Stack
+## 🛠 Tech Stack
 
-- **Framework**: NestJS v11 (Node.js)
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: TypeORM
-- **Authentication**: JWT (JSON Web Tokens) with Passport
-- **Validation**: class-validator & class-transformer
-- **Password Hashing**: bcrypt
-- **Testing**: Jest with e2e testing
-- **Linting**: ESLint + Prettier
+- **Framework**: NestJS v11 🐺
+- **Language**: TypeScript 📝
+- **Database**: PostgreSQL 🐘
+- **ORM**: TypeORM 🔗
+- **Auth**: JWT with Passport 🛡️
+- **Validation**: class-validator & class-transformer ✅
+- **Hashing**: bcrypt 🔒
+- **Queue**: RabbitMQ 🐰
+- **Cache**: Redis (via cache-manager) ⚡
+- **Payments**: Stripe 💳
+- **Images**: Cloudinary ☁️
+- **Emails**: Nodemailer with Handlebars 📧
+- **Testing**: Jest 🧪
+- **Linting**: ESLint + Prettier ✨
 
 ## 📋 Prerequisites
 
-- Node.js (v18 or higher)
-- PostgreSQL (v12 or higher)
-- npm or yarn
+- Node.js (v18+) 🌟
+- PostgreSQL (v12+) 🐘
+- npm or yarn 📦
 
 ## 🚀 Installation
 
-1. **Clone the repository**
+1. **Clone the repo**
 
    ```bash
    git clone https://github.com/a-3isa/ecommerce_store
@@ -54,11 +68,10 @@ A robust, scalable e-commerce backend API built with NestJS, featuring an advanc
    npm install
    ```
 
-3. **Environment Setup**
-   Create a `.env` file in the root directory:
+3. **Set up environment**  
+   Create `.env` file:
 
    ```env
-   # Database Configuration
    DB_HOST=localhost
    DB_PORT=5432
    DB_USERNAME=your_username
@@ -67,51 +80,42 @@ A robust, scalable e-commerce backend API built with NestJS, featuring an advanc
    DB_AUTO_LOAD_ENTITIES=true
    DB_SYNCHRONIZE=true
 
-   # JWT Configuration
    JWT_SECRET=your-super-secret-jwt-key
    JWT_EXPIRES_IN=3600s
 
-   # Application
    PORT=3000
    NODE_ENV=development
+
+   # Optional: Stripe, Cloudinary, Redis keys
+   STRIPE_SECRET_KEY=sk_test_...
+   CLOUDINARY_CLOUD_NAME=...
+   REDIS_URL=redis://localhost:6379
    ```
 
-4. **Database Setup**
+4. **Set up database**
 
    ```sql
    CREATE DATABASE ecommerce_db;
    ```
 
-5. **Run the application**
-
+5. **Run the app**
    ```bash
-   # Development mode
-   npm run start:dev
-
-   # Production mode
-   npm run start:prod
+   npm run start:dev  # Development
+   npm run start:prod  # Production
    ```
 
-6. **Stripe Webhook Setup** (Optional, for order webhooks)
+API runs at `http://localhost:3000` 🌐
 
-   If using Stripe for payments, set up webhook forwarding:
+## 📖 API Documentation
 
-   ```bash
-   stripe listen --forward-to localhost:3000/order/webhook
-   ```
+Swagger docs available at `http://localhost:3000/api/docs` 📚
 
-The API will be available at `http://localhost:3000`
+### Quick Examples
 
-## 📚 API Documentation
-
-### Authentication Endpoints
-
-#### Register User
+#### Auth
 
 ```http
 POST /auth/register
-Content-Type: application/json
-
 {
   "username": "john_doe",
   "email": "john@example.com",
@@ -119,380 +123,91 @@ Content-Type: application/json
 }
 ```
 
-#### Login
+#### Cart
 
 ```http
-POST /auth/login
-Content-Type: application/json
-
+POST /cart
+Authorization: Bearer <token>
 {
-  "username": "john_doe",
-  "password": "securepassword123"
+  "productId": "product-uuid",
+  "quantity": 2
 }
 ```
 
-#### Admin Register
+#### Order
 
 ```http
-POST /auth/adminRegister
-Content-Type: application/json
-
+POST /order
+Authorization: Bearer <token>
 {
-  "username": "admin",
-  "email": "admin@example.com",
-  "password": "adminpassword123"
+  "cartId": "cart-uuid",
+  "shippingAddress": "123 Main St"
 }
 ```
 
-### User Endpoints
-
-#### Get All Users
+#### Coupon
 
 ```http
-GET /user
-Authorization: Bearer <jwt_token>
-```
-
-#### Get User by ID
-
-```http
-GET /user/:id
-Authorization: Bearer <jwt_token>
-```
-
-### Category Endpoints
-
-#### Create Category
-
-```http
-POST /category
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
+POST /coupon/apply
 {
-  "name": "Electronics",
-  "description": "Electronic devices and accessories"
+  "code": "DISCOUNT10",
+  "orderTotal": 100
 }
 ```
 
-#### Get All Categories
-
-```http
-GET /category
-```
-
-#### Get Category by ID
-
-```http
-GET /category/:id
-```
-
-### Product Endpoints
-
-#### Create Product with EAV Attributes
+#### Product with EAV
 
 ```http
 POST /product
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
 {
   "name": "T-Shirt",
-  "slug": "t-shirt",
-  "description": "Comfortable cotton t-shirt",
   "price": 29.99,
-  "stock": 100,
-  "type": "single",
-  "sku": "TS001",
-  "barcode": "123456789",
   "categoryId": "category-uuid",
   "attributes": [
-    {
-      "attributeId": "color-attribute-id",
-      "value": "Red",
-      "metadata": {
-        "unit": "color"
-      }
-    },
-    {
-      "attributeId": "size-attribute-id",
-      "value": "Large",
-      "metadata": {
-        "unit": "size"
-      }
-    }
+    {"attributeId": "color-id", "value": "Red"},
+    {"attributeId": "size-id", "value": "Large"}
   ]
 }
 ```
 
-#### Get Products with Filtering
+## 🗄️ Database Schema (Overview)
 
-```http
-GET /product?search=t-shirt&categoryId=electronics&minPrice=10&maxPrice=50&attributeFilters=color:red,size:large&page=1&limit=10&sortBy=price&sortOrder=ASC
-```
-
-#### Search Products
-
-```http
-GET /product/search?q=t-shirt
-```
-
-#### Get Products by Category
-
-```http
-GET /product/category/:categoryId
-```
-
-#### Get Products by Attribute
-
-```http
-GET /product/attribute/:attributeId/:value
-```
-
-#### Get Category Filter Attributes
-
-```http
-GET /product/category-filters/attributes?categoryId=electronics
-```
-
-#### Get Category Attribute Values
-
-```http
-GET /product/category-filters/:categoryId/attribute/:attributeId/values
-```
-
-## 🗄️ Database Schema
-
-### Core Tables
-
-#### Users
-
-- `id` (UUID, Primary Key)
-- `username` (String, Unique)
-- `email` (String, Unique)
-- `password` (String, Hashed)
-- `roles` (JSON)
-- `isActive` (Boolean)
-- `createdAt`, `updatedAt` (Timestamps)
-
-#### Categories
-
-- `id` (UUID, Primary Key)
-- `name` (String, Unique)
-- `slug` (String, Unique)
-- `description` (Text)
-- `parentId` (UUID, Foreign Key)
-- `isActive` (Boolean)
-- `createdAt`, `updatedAt` (Timestamps)
-
-#### Products
-
-- `id` (UUID, Primary Key)
-- `name` (String)
-- `slug` (String, Unique)
-- `description` (Text)
-- `price` (Decimal)
-- `stock` (Integer)
-- `type` (Enum: single, variant, group, gift)
-- `sku` (String, Unique)
-- `barcode` (String, Unique)
-- `categoryId` (UUID, Foreign Key)
-- `isActive` (Boolean)
-- `createdAt`, `updatedAt` (Timestamps)
-
-### EAV Tables
-
-#### Product Attributes
-
-- `id` (UUID, Primary Key)
-- `name` (String, Unique) - e.g., "color", "size"
-- `displayName` (String) - e.g., "Color", "Size"
-- `type` (Enum: text, number, boolean, date, select, multiselect)
-- `description` (Text)
-- `isRequired` (Boolean)
-- `isActive` (Boolean)
-- `options` (JSON Array) - For select/multiselect types
-- `validationRules` (JSON)
-- `sortOrder` (Integer)
-- `createdAt`, `updatedAt` (Timestamps)
-
-#### Product Attribute Values
-
-- `id` (UUID, Primary Key)
-- `productId` (UUID, Foreign Key)
-- `attributeId` (UUID, Foreign Key)
-- `value` (Text)
-- `isActive` (Boolean)
-- `createdAt`, `updatedAt` (Timestamps)
-
-## 🔧 EAV System Usage
-
-### 1. Create Attributes First
-
-```http
-POST /admin/attributes
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "name": "color",
-  "displayName": "Color",
-  "type": "select",
-  "options": ["Red", "Blue", "Green", "Black"],
-  "isRequired": true,
-  "description": "Product color options"
-}
-```
-
-### 2. Create Products with Attributes
-
-```http
-POST /product
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Cotton T-Shirt",
-  "slug": "cotton-t-shirt",
-  "price": 25.99,
-  "stock": 50,
-  "categoryId": "clothing-category-id",
-  "attributes": [
-    {
-      "attributeId": "color-attribute-id",
-      "value": "Red"
-    },
-    {
-      "attributeId": "size-attribute-id",
-      "value": "Large"
-    }
-  ]
-}
-```
-
-### 3. Filter Products by Attributes
-
-```http
-GET /product?attributeFilters=color:red,size:large
-```
+- **Users**: id, username, email, password, roles
+- **Categories**: id, name, slug, parentId
+- **Products**: id, name, price, stock, categoryId
+- **Product Attributes**: id, name, type, options
+- **Product Attribute Values**: productId, attributeId, value
+- **Cart**: id, userId, items
+- **Orders**: id, userId, total, status
+- **Coupons**: id, code, discount
+- **Gifts**: id, name, description
+- **Transactions**: id, orderId, amount, status
 
 ## 🧪 Testing
 
 ```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Test coverage
-npm run test:cov
+npm run test        # Unit tests
+npm run test:e2e    # E2E tests
+npm run test:cov    # Coverage
 ```
-
-## 📝 Development Guidelines
-
-### Code Style
-
-- Follow TypeScript best practices
-- Use ESLint and Prettier for code formatting
-- Write descriptive commit messages
-- Add proper error handling
-
-### API Guidelines
-
-- Use appropriate HTTP status codes
-- Include proper error messages
-- Validate all inputs
-- Use pagination for list endpoints
-- Include proper TypeScript types
-
-### Database Guidelines
-
-- Use UUID for primary keys
-- Include createdAt and updatedAt timestamps
-- Use soft deletes where appropriate
-- Add proper indexes for performance
-
-## 🔐 Security Features
-
-- JWT-based authentication
-- Password hashing with bcrypt
-- Role-based access control
-- Input validation and sanitization
-- SQL injection prevention through TypeORM
-- CORS configuration
-
-## 📈 Performance Features
-
-- Database query optimization
-- Pagination support
-- Efficient EAV queries with proper indexing
-- Caching strategies (can be implemented)
-- Lazy loading for related entities
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new features
-5. Ensure all tests pass
-6. Submit a pull request
+1. Fork the repo 🍴
+2. Create a feature branch 🌿
+3. Make changes ✨
+4. Add tests 🧪
+5. Submit PR 📤
 
-## 🆘 Support
+## 📄 License
 
-For support and questions:
+UNLICENSED
 
-- Create an issue in the repository
-- Check the API documentation
-- Review the code examples
+## 🎯 What's Next?
 
-## 🔄 API Response Examples
+- 📈 Analytics & reporting
+- 🌍 Multi-language support
+- 🔄 Advanced caching
+- 📱 Mobile API optimizations
 
-### Successful Product Creation
-
-```json
-{
-  "id": "product-uuid",
-  "name": "T-Shirt",
-  "slug": "t-shirt",
-  "price": 29.99,
-  "stock": 100,
-  "attributeValues": [
-    {
-      "id": "attr-value-uuid",
-      "attribute": {
-        "id": "color-attr-id",
-        "name": "color",
-        "displayName": "Color"
-      },
-      "value": "Red"
-    }
-  ]
-}
-```
-
-### Filtered Products Response
-
-```json
-{
-  "products": [...],
-  "total": 150,
-  "page": 1,
-  "limit": 10,
-  "totalPages": 15
-}
-```
-
-## 🎯 Future Enhancements
-
-- [ ] Image upload and management
-- [ ] Product reviews and ratings
-- [ ] Shopping cart functionality
-- [ ] Order management system
-- [ ] Payment integration
-- [ ] Inventory management
-- [ ] Analytics and reporting
-- [ ] Multi-language support
-- [ ] API rate limiting
-- [ ] Caching layer (Redis)
+Enjoy building awesome e-commerce apps! 🎉

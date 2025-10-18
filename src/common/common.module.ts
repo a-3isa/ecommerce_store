@@ -24,6 +24,6 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
       useClass: JwtAuthGuard,
     },
   ],
-  exports: [GlobalExceptionFilter, RateLimitInterceptor, ValidationPipe],
+  // Removed exports as these are global providers and shouldn't be exported
 })
 export class CommonModule {}

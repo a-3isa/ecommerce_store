@@ -1,24 +1,31 @@
-# TODO: Add API Rate Limiting, Input Validation, and Global Error Handling
+# TODO: Document APIs with Swagger
 
-## Completed Tasks
-
-- [x] Install @nestjs/throttler package for rate limiting
-- [x] Create GlobalExceptionFilter for centralized error handling
-- [x] Create RateLimitInterceptor for API rate limiting
-- [x] Create custom ValidationPipe for input validation
-- [x] Create CommonModule to organize common functionality
-- [x] Integrate CommonModule into AppModule
-- [x] Update main.ts to remove duplicate global pipes
-- [x] Apply decorators to ProductController methods
-- [x] Run build to check for compilation errors
-- [x] Run lint to check for code quality issues
-
-## Summary
-
-Successfully implemented:
-
-1. **API Rate Limiting**: Using a custom RateLimitInterceptor that limits requests to 100 per minute per IP, with proper headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset).
-2. **Input Validation**: Custom ValidationPipe that uses class-validator and class-transformer for robust input validation with detailed error messages.
-3. **Global Error Handling**: GlobalExceptionFilter that catches all exceptions, logs them, and returns standardized error responses.
-
-The implementation is modular and reusable across the application. All features are applied globally through the CommonModule, ensuring consistency across all endpoints.
+- [x] Install @nestjs/swagger package
+- [x] Update src/main.ts to configure Swagger with DocumentBuilder and SwaggerModule
+- [x] Add Swagger decorators to src/auth/auth.controller.ts
+- [x] Add @ApiProperty decorators to auth DTOs (src/auth/dto/auth-credentials.dto.ts)
+- [x] Add Swagger decorators to src/cart/cart.controller.ts
+- [x] Add @ApiProperty decorators to cart DTOs (src/cart/dto/update-cart.dto.ts)
+- [x] Add Swagger decorators to src/category/category.controller.ts
+- [x] Add @ApiProperty decorators to category DTOs (src/category/dto/create-category.dto.ts, update-category.dto.ts, etc.)
+- [x] Add Swagger decorators to src/product/product.controller.ts
+- [x] Add @ApiProperty decorators to product DTOs (src/product/dto/create-product.dto.ts, update-product.dto.ts, etc.)
+- [x] Add Swagger decorators to src/order/order.controller.ts
+- [x] Add @ApiProperty decorators to order DTOs (src/order/dto/create-order.dto.ts, update-order.dto.ts, etc.)
+- [x] Run npm install to install dependencies
+- [x] Start the app and verify Swagger UI at http://localhost:3000/api/docs
+- [x] Add Swagger decorators to src/user/user.controller.ts
+- [x] Add @ApiProperty decorators to user DTOs (src/user/dto/create-user.dto.ts, update-user.dto.ts, user-id.dto.ts)
+- [x] Add Swagger decorators to src/gift/gift.controller.ts
+- [x] Add @ApiProperty decorators to gift DTOs (src/gift/dto/create-gift.dto.ts, gift-id.dto.ts, update-gift.dto.ts)
+- [x] Add Swagger decorators to src/coupon/coupon.controller.ts
+- [x] Add @ApiProperty decorators to coupon DTOs (src/coupon/dto/create-coupon.dto.ts, coupon-code.dto.ts, coupon-id.dto.ts, update-coupon.dto.ts)
+- [x] Add Swagger decorators to src/transaction/transaction.controller.ts
+- [x] Add @ApiProperty decorators to transaction DTOs (src/transaction/dto/transaction-id.dto.ts, update-transaction.dto.ts)
+- [x] Add Swagger decorators to src/product-attr/product-attr.controller.ts
+- [x] Add @ApiProperty decorators to product-attr DTOs (src/product-attr/dto/create-product-attr.dto.ts, product-attr-id.dto.ts, update-product-attr.dto.ts)
+- [x] Add Swagger decorators to src/product-attr-val/product-attr-val.controller.ts
+- [x] Add @ApiProperty decorators to product-attr-val DTOs (src/product-attr-val/dto/create-product-attr-val.dto.ts, product-attr-val-id.dto.ts, update-product-attr-val.dto.ts)
+- [x] Add Swagger decorators to src/product-attr-var/product-attr-var.controller.ts
+- [x] Add @ApiProperty decorators to product-attr-var DTOs (src/product-attr-var/dto/create-product-attr-var.dto.ts, product-attr-var-id.dto.ts, update-product-attr-var.dto.ts)
+- [x] Add @ApiProperty decorators to src/common/dto/common.dto.ts if needed
