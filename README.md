@@ -1,213 +1,119 @@
-# 🛒 E-Commerce Store Backend API
+# E-Commerce Store Backend API
 
-A powerful and scalable e-commerce backend built with NestJS! 🚀 Features JWT authentication, advanced EAV product system, smart filtering, shopping cart, order management, coupons, gifts, transactions, and more. Perfect for modern online stores. 💼
+A NestJS REST API for an online store: JWT authentication, a flexible EAV (Entity-Attribute-Value) product catalogue, filtering and search, cart, orders, coupons, gifts, Stripe payments and transactional email.
 
-## ✨ Features
+## Features
 
-### Core Features
+- **Auth and users**: registration, login, profiles, role-based access (JWT + Passport)
+- **Catalogue**: hierarchical categories; products with dynamic attributes (color, size, ...) defined at runtime via EAV, so new attributes need no schema change
+- **Attribute types**: text, number, boolean, date, select, multiselect, with validation rules and per-category attributes
+- **Search and filtering**: by attribute, price, category and text
+- **Cart and orders**: cart management, order creation, shipment handling, order-confirmation emails (Nodemailer + Handlebars templates)
+- **Promotions**: coupons and gift products
+- **Payments**: Stripe, with transactions recorded per order
+- **Images**: product images stored on Cloudinary
+- **Async work**: RabbitMQ queue for background jobs such as email
+- **Caching and protection**: Redis cache (cache-manager) and request rate limiting (Throttler)
 
-- 👤 **User Management**: Registration, login, profiles, and role-based access
-- 🔐 **JWT Authentication**: Secure token-based auth with Passport
-- 📂 **Category Management**: Hierarchical categories for organizing products
-- 🏷️ **Advanced Product System**: Flexible EAV (Entity-Attribute-Value) for dynamic attributes like color, size, etc.
-- 🔍 **Smart Filtering & Search**: Filter by attributes, price, category, and full-text search
-- 🛒 **Shopping Cart**: Add, update, and manage cart items
-- 📦 **Order Management**: Create orders, handle shipments, email confirmations
-- 🎁 **Gift System**: Manage gift products and options
-- 🎫 **Coupon System**: Apply discounts with coupon codes
-- 💳 **Transaction Handling**: Process payments and track transactions
-- 🖼️ **Image Management**: Cloudinary integration for product images
-- 📧 **Email Services**: Order confirmations via Mailer and Handlebars templates
-- 🐰 **Message Queue**: RabbitMQ for async processing
-- 💰 **Payment Integration**: Stripe for secure payments
-- 📊 **Caching**: Redis support for performance
-- 🛡️ **Rate Limiting**: Throttler for API protection
+## Tech stack
 
-### EAV Product System
+NestJS 11, TypeScript, PostgreSQL, TypeORM, Passport/JWT, class-validator, bcrypt, RabbitMQ, Redis, Stripe, Cloudinary, Nodemailer, Jest, ESLint + Prettier.
 
-- 🔧 **Dynamic Attributes**: Create custom attributes without schema changes
-- 📋 **Data Types**: Text, number, boolean, date, select, multiselect
-- ✅ **Validation**: Built-in rules for attribute values
-- 📁 **Category-Specific**: Attributes per category
+## Prerequisites
 
-## 🛠 Tech Stack
+- Node.js 18+ and npm
+- PostgreSQL 12+
+- Redis (cache) and RabbitMQ (queue)
+- Optional accounts: Stripe (test keys), Cloudinary, an SMTP provider
 
-- **Framework**: NestJS v11 🐺
-- **Language**: TypeScript 📝
-- **Database**: PostgreSQL 🐘
-- **ORM**: TypeORM 🔗
-- **Auth**: JWT with Passport 🛡️
-- **Validation**: class-validator & class-transformer ✅
-- **Hashing**: bcrypt 🔒
-- **Queue**: RabbitMQ 🐰
-- **Cache**: Redis (via cache-manager) ⚡
-- **Payments**: Stripe 💳
-- **Images**: Cloudinary ☁️
-- **Emails**: Nodemailer with Handlebars 📧
-- **Testing**: Jest 🧪
-- **Linting**: ESLint + Prettier ✨
+Redis and RabbitMQ can be started locally with Docker:
 
-## 📋 Prerequisites
+```bash
+docker run -d --name redis -p 6379:6379 redis
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
 
-- Node.js (v18+) 🌟
-- PostgreSQL (v12+) 🐘
-- npm or yarn 📦
+## Getting started
 
-## 🚀 Installation
+```bash
+git clone https://github.com/a-3isa/ecommerce_store
+cd ecommerce_store
+npm install
+```
 
-1. **Clone the repo**
+Create the database:
 
-   ```bash
-   git clone https://github.com/a-3isa/ecommerce_store
-   cd ecommerce_store
-   ```
+```sql
+CREATE DATABASE ecommerce_db;
+```
 
-2. **Install dependencies**
+Create a `.env` file in the project root:
 
-   ```bash
-   npm install
-   ```
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+DB_DATABASE=ecommerce_db
+DB_AUTO_LOAD_ENTITIES=true
+# Convenient for local development only. Turn off and use migrations in production.
+DB_SYNCHRONIZE=true
 
-3. **Set up environment**  
-   Create `.env` file:
+JWT_SECRET=change-me
+JWT_EXPIRES_IN=3600s
 
-   ```env
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
-   DB_DATABASE=ecommerce_db
-   DB_AUTO_LOAD_ENTITIES=true
-   DB_SYNCHRONIZE=true
+PORT=3000
+NODE_ENV=development
 
-   JWT_SECRET=your-super-secret-jwt-key
-   JWT_EXPIRES_IN=3600s
+REDIS_URL=redis://localhost:6379
+RABBITMQ_URL=amqp://localhost:5672
 
-   PORT=3000
-   NODE_ENV=development
+STRIPE_SECRET_KEY=sk_test_...
+CLOUDINARY_CLOUD_NAME=...
+```
 
-   # Optional: Stripe, Cloudinary, Redis keys
-   STRIPE_SECRET_KEY=sk_test_...
-   CLOUDINARY_CLOUD_NAME=...
-   REDIS_URL=redis://localhost:6379
-   ```
+Run:
 
-4. **Set up database**
+```bash
+npm run start:dev                      # development, hot reload
+npm run build && npm run start:prod    # production
+```
 
-   ```sql
-   CREATE DATABASE ecommerce_db;
-   ```
+The API listens on `http://localhost:3000`; Swagger docs are at `http://localhost:3000/api/docs`. Treat Swagger as the source of truth for request shapes.
 
-5. **Run the app**
-   ```bash
-   npm run start:dev  # Development
-   npm run start:prod  # Production
-   ```
-
-API runs at `http://localhost:3000` 🌐
-
-## 📖 API Documentation
-
-Swagger docs available at `http://localhost:3000/api/docs` 📚
-
-### Quick Examples
-
-#### Auth
+## Example requests
 
 ```http
 POST /auth/register
-{
-  "username": "john_doe",
-  "email": "john@example.com",
-  "password": "securepassword123"
-}
-```
+{ "username": "john_doe", "email": "john@example.com", "password": "securepassword123" }
 
-#### Cart
+POST /cart                      (Authorization: Bearer <token>)
+{ "productId": "<product-uuid>", "quantity": 2 }
 
-```http
-POST /cart
-Authorization: Bearer <token>
-{
-  "productId": "product-uuid",
-  "quantity": 2
-}
-```
+POST /order                     (Authorization: Bearer <token>)
+{ "cartId": "<cart-uuid>", "shippingAddress": "123 Main St" }
 
-#### Order
-
-```http
-POST /order
-Authorization: Bearer <token>
-{
-  "cartId": "cart-uuid",
-  "shippingAddress": "123 Main St"
-}
-```
-
-#### Coupon
-
-```http
 POST /coupon/apply
-{
-  "code": "DISCOUNT10",
-  "orderTotal": 100
-}
-```
+{ "code": "DISCOUNT10", "orderTotal": 100 }
 
-#### Product with EAV
-
-```http
 POST /product
-{
-  "name": "T-Shirt",
-  "price": 29.99,
-  "categoryId": "category-uuid",
-  "attributes": [
-    {"attributeId": "color-id", "value": "Red"},
-    {"attributeId": "size-id", "value": "Large"}
-  ]
-}
+{ "name": "T-Shirt", "price": 29.99, "categoryId": "<category-uuid>",
+  "attributes": [ { "attributeId": "<color-id>", "value": "Red" },
+                  { "attributeId": "<size-id>", "value": "Large" } ] }
 ```
 
-## 🗄️ Database Schema (Overview)
+## Data model (overview)
 
-- **Users**: id, username, email, password, roles
-- **Categories**: id, name, slug, parentId
-- **Products**: id, name, price, stock, categoryId
-- **Product Attributes**: id, name, type, options
-- **Product Attribute Values**: productId, attributeId, value
-- **Cart**: id, userId, items
-- **Orders**: id, userId, total, status
-- **Coupons**: id, code, discount
-- **Gifts**: id, name, description
-- **Transactions**: id, orderId, amount, status
+Users, Categories (self-referencing parent), Products, Product Attributes, Product Attribute Values (product x attribute), Cart and cart items, Orders, Coupons, Gifts, Transactions.
 
-## 🧪 Testing
+## Testing
 
 ```bash
-npm run test        # Unit tests
-npm run test:e2e    # E2E tests
-npm run test:cov    # Coverage
+npm run test       # unit
+npm run test:e2e   # end to end
+npm run test:cov   # coverage
 ```
 
-## 🤝 Contributing
+## License
 
-1. Fork the repo 🍴
-2. Create a feature branch 🌿
-3. Make changes ✨
-4. Add tests 🧪
-5. Submit PR 📤
-
-## 📄 License
-
-UNLICENSED
-
-## 🎯 What's Next?
-
-- 📈 Analytics & reporting
-- 🌍 Multi-language support
-- 🔄 Advanced caching
-- 📱 Mobile API optimizations
-
-Enjoy building awesome e-commerce apps! 🎉
+UNLICENSED. Source is public for portfolio review.
