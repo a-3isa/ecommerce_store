@@ -9,7 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     GolevelupRabbitMQModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('RABBITMQ_URI'),
+        uri: configService.get<string>('RABBITMQ_URI'),
         connectionOptions: {
           timeout: 100000, // Increase timeout to 10 seconds
         },
