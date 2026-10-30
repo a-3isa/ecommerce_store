@@ -17,8 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^6.0.2",
@@ -58,6 +57,7 @@
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
     "eslint": "^9.18.0",
@@ -78,8 +78,7 @@
       "ts"
     ],
     "roots": [
-      "<rootDir>/src",
-      "<rootDir>/test"
+      "<rootDir>/src"
     ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
@@ -90,7 +89,7 @@
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
-    "moduleNameMapping": {
+    "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/src/$1"
     }
   },
