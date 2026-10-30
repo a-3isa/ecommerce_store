@@ -19,7 +19,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { CouponModule } from './coupon/coupon.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { MailerModule } from 'node_modules/@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { CommonModule } from './common/common.module';
 @Module({
   imports: [
