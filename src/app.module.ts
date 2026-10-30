@@ -70,7 +70,7 @@ import { CommonModule } from './common/common.module';
         password: configService.get('DB_PASSWORD'),
         port: Number(configService.get('DB_PORT')),
         database: configService.get('DB_DATABASE') as string,
-        entities: [__dirname + '/../**/*.entity.{js,ts}'],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: true,
         logging: true,
