@@ -6,18 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { UpdateGiftDto } from './dto/update-gift.dto';
 import { GiftIdDto } from './dto/gift-id.dto';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('gift')
 @Controller('gift')
 export class GiftController {
   constructor(private readonly giftService: GiftService) {}
 
+  @UseGuards(RoleGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new gift rule' })
   @ApiResponse({ status: 201, description: 'Gift rule created successfully' })
@@ -42,6 +45,7 @@ export class GiftController {
     return this.giftService.findOne(id);
   }
 
+  @UseGuards(RoleGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update gift rule by ID' })
   @ApiParam({ name: 'id', description: 'Gift rule ID' })
@@ -52,6 +56,7 @@ export class GiftController {
     return this.giftService.update(id, updateGiftDto);
   }
 
+  @UseGuards(RoleGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete gift rule by ID' })
   @ApiParam({ name: 'id', description: 'Gift rule ID' })

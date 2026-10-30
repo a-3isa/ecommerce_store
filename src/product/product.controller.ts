@@ -11,6 +11,7 @@ import {
   BadRequestException,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,6 +30,7 @@ import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
 import { FileInterceptor } from 'node_modules/@nestjs/platform-express';
 import { LogMethod } from './decorators/logging.decorator';
 import { ValidateRequest } from './decorators/validation.decorator';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('products')
 @Controller('product')
@@ -36,6 +38,7 @@ import { ValidateRequest } from './decorators/validation.decorator';
 export class ProductController {
   constructor(private productService: ProductService) {}
 
+  @UseGuards(RoleGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: 'Create a new product' })
@@ -92,6 +95,7 @@ export class ProductController {
     return product;
   }
 
+  @UseGuards(RoleGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a product' })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -116,6 +120,7 @@ export class ProductController {
     }
   }
 
+  @UseGuards(RoleGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'id', description: 'Product ID' })

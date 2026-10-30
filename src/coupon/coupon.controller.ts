@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CouponService } from './coupon.service';
@@ -15,12 +16,14 @@ import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { CouponIdDto } from './dto/coupon-id.dto';
 import { CouponCodeDto } from './dto/coupon-code.dto';
 import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('coupon')
 @Controller('coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
 
+  @UseGuards(RoleGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new coupon' })
   @ApiResponse({ status: 201, description: 'Coupon created successfully' })
@@ -28,6 +31,7 @@ export class CouponController {
     return this.couponService.create(createCouponDto);
   }
 
+  @UseGuards(RoleGuard)
   @Get()
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get all coupons' })
@@ -36,6 +40,7 @@ export class CouponController {
     return this.couponService.findAll();
   }
 
+  @UseGuards(RoleGuard)
   @Get(':id')
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Get coupon by ID' })
@@ -47,6 +52,7 @@ export class CouponController {
     return this.couponService.findOne(id);
   }
 
+  @UseGuards(RoleGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update coupon by ID' })
   @ApiParam({ name: 'id', description: 'Coupon ID' })
@@ -60,6 +66,7 @@ export class CouponController {
     return this.couponService.update(id, updateCouponDto);
   }
 
+  @UseGuards(RoleGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete coupon by ID' })
   @ApiParam({ name: 'id', description: 'Coupon ID' })

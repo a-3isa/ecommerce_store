@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryIdDto } from './dto/category-id.dto';
+import { RoleGuard } from 'src/auth/roles.guard';
 // import { GetCategoryProductsDto } from './dto/get-category-products.dto';
 
 @ApiTags('categories')
@@ -19,6 +21,7 @@ import { CategoryIdDto } from './dto/category-id.dto';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @UseGuards(RoleGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ status: 201, description: 'Category created successfully' })
@@ -84,6 +87,7 @@ export class CategoryController {
   //   return this.categoryService.getCategoryProductsAndFilters(id, +page);
   // }
 
+  @UseGuards(RoleGuard)
   @Patch('/:id')
   @ApiOperation({ summary: 'Update a category' })
   @ApiParam({ name: 'id', description: 'Category ID' })
@@ -97,6 +101,7 @@ export class CategoryController {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
+  @UseGuards(RoleGuard)
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete a category' })
   @ApiParam({ name: 'id', description: 'Category ID' })
