@@ -1,16 +1,26 @@
-import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserIdDto } from './dto/user-id.dto';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from './entities/user.entity';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(RoleGuard)
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of all users' })
@@ -25,6 +35,7 @@ export class UserController {
     return this.userService.getMe(user.id);
   }
 
+  @UseGuards(RoleGuard)
   @Get('/:id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })
@@ -42,6 +53,7 @@ export class UserController {
     return this.userService.update(user, updateUserDto);
   }
 
+  @UseGuards(RoleGuard)
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })

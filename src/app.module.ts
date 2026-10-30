@@ -18,8 +18,8 @@ import { OrderModule } from './order/order.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { CouponModule } from './coupon/coupon.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
-import { MailerModule } from 'node_modules/@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { CommonModule } from './common/common.module';
 @Module({
   imports: [
@@ -70,7 +70,7 @@ import { CommonModule } from './common/common.module';
         password: configService.get('DB_PASSWORD'),
         port: Number(configService.get('DB_PORT')),
         database: configService.get('DB_DATABASE') as string,
-        entities: [__dirname + '/../**/*.entity.{js,ts}'],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: true,
         logging: true,

@@ -36,12 +36,15 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# dotenv environment variable files
+# dotenv environment variable files: only the example is committed
 .env
-.env.development
-.env.test.local
-.env.production
-.env.local
+.env.*
+!.env.example
+
+# Keys and certificates
+*.pem
+*.key
+*.p12
 
 # temp directory
 .temp

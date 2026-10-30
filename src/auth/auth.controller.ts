@@ -1,8 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,7 +33,7 @@ export class AuthController {
     return this.authService.login(authCredentialsDto);
   }
 
-  // @UseGuards(RoleGuard)
+  @UseGuards(RoleGuard)
   @Post('/adminRegister')
   @ApiOperation({ summary: 'Register a new admin user' })
   @ApiResponse({ status: 201, description: 'Admin registered successfully' })

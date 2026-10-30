@@ -7,19 +7,22 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ProductAttrVarService } from './product-attr-var.service';
 import { CreateProductAttrVarDto } from './dto/create-product-attr-var.dto';
 import { UpdateProductAttrVarDto } from './dto/update-product-attr-var.dto';
 import { ProductAttrVarIdDto } from './dto/product-attr-var-id.dto';
-import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('product-attribute-variations')
 @Controller('product-attr-var')
 export class ProductAttrVarController {
   constructor(private readonly productAttrVarService: ProductAttrVarService) {}
 
+  @UseGuards(RoleGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new product attribute variation' })
   @ApiResponse({
@@ -58,6 +61,7 @@ export class ProductAttrVarController {
     return this.productAttrVarService.findOne(id);
   }
 
+  @UseGuards(RoleGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a product attribute variation' })
   @ApiParam({ name: 'id', description: 'Product attribute variation ID' })
@@ -77,6 +81,7 @@ export class ProductAttrVarController {
     return this.productAttrVarService.update(id, updateProductAttrVarDto);
   }
 
+  @UseGuards(RoleGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product attribute variation' })
   @ApiParam({ name: 'id', description: 'Product attribute variation ID' })
