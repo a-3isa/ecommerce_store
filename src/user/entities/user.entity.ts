@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Cart } from '../../cart/entities/cart.entity';
 import { Order } from '../../order/entities/order.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
@@ -27,6 +28,7 @@ export class User {
   public email: string;
 
   @Column()
+  @Exclude()
   public password: string;
 
   @Column({
