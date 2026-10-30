@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Order } from './entities/order.entity';
-import { RabbitSubscribe } from 'node_modules/@golevelup/nestjs-rabbitmq/lib';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class EmailService {

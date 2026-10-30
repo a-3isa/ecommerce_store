@@ -14,7 +14,7 @@ import { ProductAttrVarService } from './product-attr-var.service';
 import { CreateProductAttrVarDto } from './dto/create-product-attr-var.dto';
 import { UpdateProductAttrVarDto } from './dto/update-product-attr-var.dto';
 import { ProductAttrVarIdDto } from './dto/product-attr-var-id.dto';
-import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('product-attribute-variations')

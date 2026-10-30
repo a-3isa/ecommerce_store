@@ -15,7 +15,7 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { CouponIdDto } from './dto/coupon-id.dto';
 import { CouponCodeDto } from './dto/coupon-code.dto';
-import { CacheInterceptor } from 'node_modules/@nestjs/cache-manager';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RoleGuard } from 'src/auth/roles.guard';
 
 @ApiTags('coupon')
