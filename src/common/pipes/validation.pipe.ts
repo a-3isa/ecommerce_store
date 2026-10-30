@@ -21,7 +21,9 @@ export class ValidationPipe implements PipeTransform<any> {
     }
 
     const object = plainToInstance(metatype, value) as Record<string, unknown>;
-    const errors = await validate(object);
+    // whitelist drops properties a DTO does not declare, so clients cannot set
+    // fields such as `role` through PATCH /user.
+    const errors = await validate(object, { whitelist: true });
 
     if (errors.length > 0) {
       const errorMessages = errors.map((error) => {
