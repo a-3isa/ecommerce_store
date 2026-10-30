@@ -1,5 +1,8 @@
 # E-Commerce Store API
 
+[![CI](https://github.com/a-3isa/ecommerce_store/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/a-3isa/ecommerce_store/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/language-TypeScript-3178c6.svg)
+
 A NestJS REST API for an online shop: JWT accounts with shopper and admin roles, a product catalogue whose attributes (colour, size, ...) are data rather than columns, coupons, gift rules, Stripe Checkout with a signed webhook, and order-confirmation emails sent through a RabbitMQ queue.
 
 ## Overview
